@@ -1,0 +1,25 @@
+{
+  "name": "web-api",
+  "version": "1.0.0",
+  "description": "Outcomes-based quality assurance web-api",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OBQA-DLSU/web-api.git"
+  },
+  "author": "John Higgins M. Avila",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OBQA-DLSU/web-api/issues"
+  },
+  "homepage": "https://github.com/OBQA-DLSU/web-api",
+  "dependencies": {
+    "cors": "^2.8.4",
+    "express": "^4.16.2",
+    "morgan": "^1.9.0"
+  }
+}
