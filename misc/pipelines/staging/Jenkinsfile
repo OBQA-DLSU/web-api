@@ -12,7 +12,7 @@ node {
        sh 'npm test'
      }
    }
-   stage('heroku-deploy') {
+   stage('heroku-deploy-staging') {
      sh '''
         # exit 1 on errors
         set -e
