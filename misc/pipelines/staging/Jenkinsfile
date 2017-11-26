@@ -25,7 +25,7 @@ node {
         # push only origin/master to heroku/master - will do nothing if
         # master doesn't change.
         echo "Updating heroku master branch..."
-        git push heroku origin/dev/1.6:master
+        git push heroku origin/${branch}:master
         '''     
    }
 }
