@@ -8,11 +8,13 @@ node {
    stage('test') {
      nodejs(nodeJSInstallationName: 'Node JS LTS') {
        sh 'npm install'
+       sh 'export NODE_ENV=test'
        sh 'npm test'
      }
    }
-   stage('heroku-build') {
-     sh 'heroku create dlsu-obqa'
+   stage('heroku-create') {
+     # change the name below...
+     sh 'heroku create dlsu-obqa-staging'
      sh 'git checkout master'
      sh 'git push heroku master'
      sh 'heroku ps:scale web=1'     
