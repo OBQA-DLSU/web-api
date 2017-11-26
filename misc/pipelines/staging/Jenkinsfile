@@ -1,5 +1,6 @@
 node {
    def commit_id
+   def branch
    stage('Preparation') {
      checkout scm
      sh "git rev-parse --short HEAD > .git/commit-id"                        
@@ -13,6 +14,7 @@ node {
      }
    }
    stage('heroku-deploy-staging') {
+     branch = env.getEnvironment().containsKey('branch')
      sh '''
         # exit 1 on errors
         set -e
@@ -25,7 +27,7 @@ node {
         # push only origin/master to heroku/master - will do nothing if
         # master doesn't change.
         echo "Updating heroku master branch..."
-        git push heroku origin/'${branch}':master
+        git push heroku origin/${branch}:master
         '''     
    }
 }
