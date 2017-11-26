@@ -13,7 +13,7 @@ node {
      }
    }
    stage('heroku-deploy-staging') {
-     echo ${env.WEB_API_BRANCH}
+     sh 'echo "'${env.WEB_API_BRANCH}'"'
      sh '''
         # exit 1 on errors
         set -e
@@ -26,7 +26,7 @@ node {
         # push only origin/master to heroku/master - will do nothing if
         # master doesn't change.
         echo "Updating heroku master branch..."
-        git push heroku origin/${env.WEB_API_BRANCH}:master
+        git push heroku origin/'${env.WEB_API_BRANCH}':master
         '''     
    }
 }
