@@ -13,6 +13,7 @@ node {
      }
    }
    stage('heroku-deploy-staging') {
+     echo ${env.WEB_API_BRANCH}
      sh '''
         # exit 1 on errors
         set -e
