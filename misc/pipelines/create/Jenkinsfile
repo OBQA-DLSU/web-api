@@ -12,11 +12,18 @@ node {
        sh 'npm test'
      }
    }
-   stage('heroku-create') {
-     sh '# change the name below...'
-     sh 'heroku create dlsu-obqa-staging'
+   stage('heroku-create-staging') {
+     sh 'echo Creating dlsu-obqa-web-api-staging'
+     sh 'heroku create dlsu-obqa-web-api-staging'
      sh 'git checkout master'
      sh 'git push heroku master'
      sh 'heroku ps:scale web=1'     
+   }
+   stage('heroku-create-production') {
+     sh 'echo Creating dlsu-obqa-web-api'
+     sh 'heroku create dlsu-obqa-web-api'
+     sh 'git checkout master'
+     sh 'git push heroku master'
+     sh 'heroku ps:scale web=1'
    }
 }
