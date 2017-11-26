@@ -13,7 +13,7 @@ node {
      }
    }
    stage('heroku-create') {
-     sh # change the name below...
+     sh '# change the name below...'
      sh 'heroku create dlsu-obqa-staging'
      sh 'git checkout master'
      sh 'git push heroku master'
