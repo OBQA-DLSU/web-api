@@ -1,0 +1,22 @@
+node {
+   def commit_id
+   stage('Preparation') {
+     checkout scm
+     sh "git rev-parse --short HEAD > .git/commit-id"                        
+     commit_id = readFile('.git/commit-id').trim()
+   }
+   stage('test') {
+     nodejs(nodeJSInstallationName: 'Node JS LTS') {
+       sh 'npm install'
+       sh 'export NODE_ENV=test'
+       sh 'npm test'
+     }
+   }
+   stage('heroku-create-production') {
+     sh 'echo Creating dlsu-obqa-web-api'
+     sh 'heroku create dlsu-obqa-web-api'
+     sh 'git checkout master'
+     sh 'git push heroku master'
+     sh 'heroku ps:scale web=1'     
+   }
+}
