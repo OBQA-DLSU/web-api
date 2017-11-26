@@ -20,7 +20,7 @@ node {
         echo "Checking if remote exists..."
         if ! git ls-remote heroku; then
           echo "Adding heroku remote..."
-          git remote add heroku https://git.heroku.com/obqa-dlsu-web-api.git
+          git remote add heroku https://git.heroku.com/dlsu-obqa-web-api.git
         fi
         # push only origin/master to heroku/master - will do nothing if
         # master doesn't change.
