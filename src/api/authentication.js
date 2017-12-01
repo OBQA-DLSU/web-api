@@ -1,6 +1,9 @@
 const db = require('../models');
-const config = require('../../config');
 const jwtService = require('../services/jwt.service');
+const Op = require('sequelize').Op;
+const to = require('await-to-js');
+const _ = require('lodash');
+const invitationCodeService = require('../services/invitationCode.service');
 
 const { user } = db;
 
@@ -12,52 +15,36 @@ exports.signin = function(req, res, next) {
   }
   res.send({user, token: jwtService.tokenForUser(req.user)});
 };
-exports.signup = function (req, res, next) {
-  const email = req.body.email;
-  const password = req.body.password;
-  if (!email || !password) {
-    return res.status(422).send({error: 'You must provide email and password'});
+exports.signup = async (req, res, next) => {
+  const { email, fname, lname, idNumber, password, confirmation, invitationCode } = req.body;
+  let checkForUser, programId, roleId, convertedCode, output, codeOutput, user, instructor, token, err;
+
+  try {
+    checkForUser = await db.user.findAll({where: {
+      [Op.or]: [{email}, {idNumber}]
+    }});
+
+    if(checkForUser.length > 0) { res.status(422).send({errorMessage: 'Email or IdNumber is already in use'}); return; }
+    output = await db.invitationCode.findOne({where: {
+      invitationCode
+    }});
+
+    if(!output) { res.status(422).send({errorMessage: 'Invalid Invitation code.'}); return; }
+
+    codeOutput = output.code;
+    convertedCode = invitationCodeService.readCode(codeOutput);
+    programId = convertedCode.programId;
+    roleId = convertedCode.roleId;
+    user = await db.user.create({email, fname, lname, idNumber, password, confirmation, programId, roleId },{ individualHooks: true, raw: true });
+    if(!user) { res.status(422).send({errorMessage: 'Invalid Credentials'}); return; }
+    instructor = await db.instructor.create({userId: user.id, programId, status: 'ACTIVE'});
+    token = await jwtService.tokenForUser(user.id);
+    res.status(200).send({user, token});
+    return;
   }
-  user.findOne({
-    where:{
-      email
-    }
-  })
-  .then(existingUser => {
-    if(existingUser){
-      return res.status(422).send({error: 'Email is in use'});
-    }else{
-      user.findAll({})
-      .then(result => {
-        if (result.length === 0) {
-          return role = 1;
-        }
-      })
-      .then(role => {
-        user.create({
-          email,
-          password,
-          role
-        }, {
-          individualHooks: true
-        })
-        .then(result => {
-          const user = {
-            id: result.id,
-            email: result.email,
-            role: result.role
-          }
-          if(!result){return res.status(500).send({error:'Cannot create new user'})}
-          else {res.status(200).send({user,token:jwtService.tokenForUser(result)});}
-        })
-        .catch(err => {
-          console.log(err);
-          return res.status(500).send(err);
-        })
-      })
-    }
-  })
-  .catch(err => {
-    return res.status(500).send(err);
-  });
+  catch(e) {
+    console.log(e);
+    res.status(500).send({errorMessage: e});
+    return;
+  }
 }
