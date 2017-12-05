@@ -1,7 +1,7 @@
 const sgMail = require('@sendgrid/mail');
 const db = require('../models');
 const invitationCodeService = require('../services/invitationCode.service');
-
+const secretKeys = require('../../secret-keys');
 exports.invitation = async (req, res, next) => {
   console.log(req.body);
   // this should be an array of invitations
@@ -49,7 +49,7 @@ const getCode = (program, role) => {
 
 const invite = (email, invitationCode) => {
   return new Promise( async (resolve, reject) => {
-    sgMail.setApiKey('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');
+    sgMail.setApiKey(secretKeys.OBQA_INVITE_KEY);
     const msg = {
       to: email,
       from: 'johnhiggins.avila@gmail.com',
