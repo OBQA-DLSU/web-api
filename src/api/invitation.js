@@ -54,7 +54,7 @@ const invite = (email, invitationCode) => {
       to: email,
       from: 'johnhiggins.avila@gmail.com',
       subject: 'Invitation from GCOE-CQI office',
-      html: `<strong>Hello!</strong><br /><p>Please click the following link to signup: <a href="www.google.com/${invitationCode}">Sign up with code: ${invitationCode}<a></p></br><p>Sincerely,</p></br><p>GCOE-CQI Team</p>`
+      html: `<strong>Hello!</strong><br/><p>Please click the following link to signup: <a href="www.google.com/${invitationCode}">Sign up with code: ${invitationCode}<a></p></br><p>Sincerely,</p></br><p>GCOE-CQI Team</p>`
     };
     try {
       const mailResponse = await sgMail.send(msg);

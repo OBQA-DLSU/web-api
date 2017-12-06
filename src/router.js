@@ -7,4 +7,5 @@ module.exports = (app) => {
   // auth
   app.use('/api/auth', authenticationRouter);
   app.use('/api/invitation', invitationRouter);
+  app.use('/api/course',courseRouter);
 };
