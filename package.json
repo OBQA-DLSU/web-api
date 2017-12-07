@@ -21,6 +21,7 @@
     "@sendgrid/mail": "^6.1.4",
     "await-to-js": "^2.0.1",
     "bcrypt-nodejs": "0.0.3",
+    "bluebird": "^3.5.1",
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "express-async-errors": "^2.1.0",
@@ -38,6 +39,7 @@
     "redis": "^2.8.0",
     "sendgrid": "^5.2.3",
     "sequelize": "^4.23.1",
+    "xlsx-to-json": "^0.3.0",
     "xoauth2": "^1.2.0"
   },
   "devDependencies": {

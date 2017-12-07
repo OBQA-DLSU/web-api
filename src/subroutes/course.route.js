@@ -16,6 +16,4 @@ courseRouter.route('/bulk/:programId')
 .put(Course.bulkUpdateCourse)
 .delete(Course.bulkDeleteCourse);
 
-
-
 module.exports = courseRouter;
