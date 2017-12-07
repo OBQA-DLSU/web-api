@@ -2,7 +2,7 @@ const express = require('express');
 const courseRouter = express.Router();
 const Course = require('../api/course');
 
-courseRouter.route('/:programId')
+courseRouter.route('/:programId/:toBeAssessed')
 .get(Course.getCourse)
 .post(Course.addCourse);
 
