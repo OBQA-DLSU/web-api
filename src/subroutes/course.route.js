@@ -2,14 +2,19 @@ const express = require('express');
 const courseRouter = express.Router();
 const Course = require('../api/course');
 
-courseRouter.route('/')
+courseRouter.route('/:programId')
 .get(Course.getCourse)
 .post(Course.addCourse);
 
-courseRouter.route('/:id')
+courseRouter.route('/programCourse/:id')
 .get(Course.getOneCourse)
 .put(Course.updateCourse)
 .delete(Course.deleteCourse);
+
+courseRouter.route('/bulk/:programId')
+.post(Course.bulkAddCourse)
+.put(Course.bulkUpdateCourse)
+.delete(Course.bulkDeleteCourse);
 
 
 
