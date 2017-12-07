@@ -1,5 +1,6 @@
 const db = require('../models');
 const ErrorMessageService = require('../services/errorMessage.service');
+const xlsxJsonService = require('../services/xlsxJson.service');
 
 exports.getCourse = async (req, res, next) => {
   const { programId, toBeAssessed } = req.params;
@@ -88,6 +89,54 @@ exports.deleteCourse = async (req, res, next) => {
   }
 };
 
+// bulk transactions
+exports.bulkAddCourse = async (req, res, next) => {
+  const { programId } = req.params;
+  let jsonData, err = [], success =[];
+  try {
+    jsonData = await xlsxJsonService.parseXlsx(req.file);
+    if (!jsonData || jsonData.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Invalid file or Unsupported format`)); return; }
+    
+    const result = Promise.all( jsonData.map( async (data) => {
+      const {code, name, description, toBeAssessed } = data;
+      let addCourseResponse, course, addProgramCourseResponse, programCourse, result;
+      try {
+        course = await db.course.findOne({where: {code}});
+        if (!course) {
+          addCourseResponse = await courseCreate(name, code);
+          if(!addCourseResponse) { err.push(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
+        } else {
+          addCourseResponse = course;
+        }
+        programCourse = await db.programCourse.findOne({where: {programId, courseId: course.id}});
+        if(!programCourse) {
+          addProgramCourseResponse = await programCourseCreate(programId, course.id, toBeAssessed, description);
+          if(!programCourseResponse) { res.status(400).send(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
+        } else {
+          addProgramCourseResponse = programCourse;
+        }
+        success.push(addProgramCourseResponse, addCourseResponse);
+      }
+      catch (e) {
+        err.push(ErrorMessageService.serverError());
+      }
+    }));
+
+    res.status(200).send({success, err});
+  }
+  catch (e) {
+    res.status(500).send(ErrorMessageService.serverError);
+  }
+};
+
+exports.bulkUpdateCourse = async (req, res, next) => {
+  res.satus(200).send({message: `This feature is not yet available...`});
+};
+
+exports.bulkDeleteCourse = async (req, res, next) => {
+  res.status(200).send({message: `This feature is not yet available...`});
+};
+
 
 // functions
 const courseCreate = (name, code, description) => {
@@ -137,3 +186,5 @@ const programCourseUpdate = (id, programId, courseId, toBeAssessed, description)
     });
   });
 };
+
+
