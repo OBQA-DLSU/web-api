@@ -17,7 +17,7 @@ exports.getCourse = async (req, res, next) => {
 
 exports.addCourse = async (req, res, next) => {
   const {code, name, description } = req.body;
-  const { programId, toBeAssessed } = req.body.params;
+  const { programId, toBeAssessed } = req.params;
   let addCourseResponse, course, addProgramCourseResponse, programCourse, result;
   try {
     course = await db.course.findOne({where: {code}});
