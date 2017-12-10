@@ -1,12 +1,11 @@
 const db = require('../models');
 const ErrorMessageService = require('../services/errorMessage.service');
-const xlsxJsonService = require('../services/xlsxJson.service');
 
 exports.getCourse = async (req, res, next) => {
-  const { programId, toBeAssessed } = req.params;
+  const { programId } = req.params;
   let programCourses;
   try {
-    programCourses = await db.programCourse.findAll({ where: {programId, toBeAssessed: JSON.parse(toBeAssessed) === true }, include: [ { all: true } ] });
+    programCourses = await db.programCourse.findAll({ where: { programId }, include: [ { all: true } ] });
     if(!programCourses || programCourses.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Cannot find Course for Program ID: ${programId}`)); return; }
     res.status(200).send(programCourses);
   }
@@ -81,8 +80,8 @@ exports.deleteCourse = async (req, res, next) => {
   const { id } = req.params;
   let deleteProgramCourseResponse;
   try {
-    deleteProgramCourseResponse = await db.programCourse.delete({where: {id}, individualHooks: true});
-    res.status(200).send(deleteProgramCourseResponse);
+    deleteProgramCourseResponse = await db.programCourse.destroy({where: {id}, individualHooks: true});
+    res.status(200).send({message: `Course with program Course ID: ${id} has successfully deleted.`});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -91,14 +90,31 @@ exports.deleteCourse = async (req, res, next) => {
 
 // bulk transactions
 exports.bulkAddCourse = async (req, res, next) => {
+  if (!req.file) { res.status(400).send(ErrorMessageService.clientError('No File Detected')); return; }
+  // console.log(req.file);
   const { programId } = req.params;
   let jsonData, err = [], success =[];
   try {
-    jsonData = await xlsxJsonService.parseXlsx(req.file);
+    // jsonData = await xlsxJsonService.parseXlsx(req.file.originalname);
+    jsonData = req.payload;
     if (!jsonData || jsonData.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Invalid file or Unsupported format`)); return; }
     
-    const result = Promise.all( jsonData.map( async (data) => {
-      const {code, name, description, toBeAssessed } = data;
+    const result = await Promise.all( jsonData.map( async (data) => {
+      // const {code, name, description, toBeAssessed } = data;
+      const getToBeAssessed = (data) => {
+        if(data['TO BE ASSESSED'] && data['TO BE ASSESSED'].toString().toUpperCase() === 'TRUE') {
+          return true;
+        } else {
+          return false;
+        }
+      };
+      const newData = {
+        code: data['CODE'],
+        name: data['NAME'],
+        description: data['DESCRIPTION'],
+        toBeAssessed: getToBeAssessed(data)
+      };
+      const { code, name, description, toBeAssessed } = newData;
       let addCourseResponse, course, addProgramCourseResponse, programCourse, result;
       try {
         course = await db.course.findOne({where: {code}});
@@ -108,6 +124,7 @@ exports.bulkAddCourse = async (req, res, next) => {
         } else {
           addCourseResponse = course;
         }
+        console.log(course);
         programCourse = await db.programCourse.findOne({where: {programId, courseId: course.id}});
         if(!programCourse) {
           addProgramCourseResponse = await programCourseCreate(programId, course.id, toBeAssessed, description);
@@ -118,14 +135,14 @@ exports.bulkAddCourse = async (req, res, next) => {
         success.push(addProgramCourseResponse, addCourseResponse);
       }
       catch (e) {
-        err.push(ErrorMessageService.serverError());
+        err.push(e);
       }
     }));
 
     res.status(200).send({success, err});
   }
   catch (e) {
-    res.status(500).send(ErrorMessageService.serverError);
+    res.status(500).send(ErrorMessageService.serverError());
   }
 };
 
@@ -137,7 +154,6 @@ exports.bulkDeleteCourse = async (req, res, next) => {
   res.status(200).send({message: `This feature is not yet available...`});
 };
 
-
 // functions
 const courseCreate = (name, code, description) => {
   return new Promise((resolve, reject) => {
@@ -146,7 +162,8 @@ const courseCreate = (name, code, description) => {
       resolve(result);
     })
     .catch(e => {
-      reject(ErrorMessageService.serverError());
+      if (!e) {resolve({message: 'Success'});}
+      reject(e);
     });
   });
 };
@@ -186,5 +203,3 @@ const programCourseUpdate = (id, programId, courseId, toBeAssessed, description)
     });
   });
 };
-
-
