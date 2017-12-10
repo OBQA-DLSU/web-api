@@ -17,7 +17,7 @@ exports.getCourse = async (req, res, next) => {
 exports.addCourse = async (req, res, next) => {
   const {code, name, description } = req.body;
   const { programId, toBeAssessed } = req.params;
-  let addCourseResponse, course, addProgramCourseResponse, programCourse, result;
+  let addCourseResponse, course, addProgramCourseResponse, programCourse, finalProgramCourse;
   try {
     course = await db.course.findOne({where: {code}});
     if (!course) {
@@ -29,11 +29,12 @@ exports.addCourse = async (req, res, next) => {
     programCourse = await db.programCourse.findOne({where: {programId, courseId: course.id}});
     if(!programCourse) {
       addProgramCourseResponse = await programCourseCreate(programId, course.id, toBeAssessed, description);
-      if(!programCourseResponse) { res.status(400).send(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
+      if(!addProgramCourseResponse) { res.status(400).send(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
     } else {
       addProgramCourseResponse = programCourse;
     }
-    res.status(200).send(addProgramCourseResponse, addCourseResponse);
+    finalProgramCourse = await db.programCourse.findOne({ where: {id: addProgramCourseResponse.id }, include: [{all:true}]});
+    res.status(200).send(finalProgramCourse);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -56,19 +57,17 @@ exports.getOneCourse = async (req, res, next) => {
 exports.updateCourse = async (req, res, next) => {
   const { id } = req.params;
   const { code, name, description, toBeAssessed } = req.body;
-  let updateCourseResponse, course, updateProgramCourseResponse, programCourse;
+  let updateCourseResponse, updateProgramCourseResponse, updatedProgramCourse;
   try {
-    programCourse = db.programCourse.findOne({where: {id}});
+    programCourse = await db.programCourse.findOne({where: {id}});
     if (!programCourse) { res.status(400).send(ErrorMessageService.clientError(`Program Course ID: ${id} not found.`)); return; }
     else {
-      updateCourseResponse = await courseUpdate(programCourse.id, name, code);
+      updateCourseResponse = await courseUpdate(programCourse.courseId, name, code);
       updateProgramCourseResponse = await programCourseUpdate(id, programCourse.programId, programCourse.courseId, (JSON.parse(toBeAssessed) === true)? true : false);
     }
     if (!updateCourseResponse || !updateProgramCourseResponse) { res.status(400).send(ErrorMessageService.clientError(`Proccess Error.`)); return; }
-    const result = {
-      programCourse: updateProgramCourseResponse,
-      course: updateCourseResponse
-    };
+    updatedProgramCourse = await db.programCourse.find({where: {id}, include: [{all:true}]});
+    if (!updatedProgramCourse) { res.status(400).send(ErrorMessageService.clientError(`Proccess Error.`)); return; }
     res.status(200).send(result);
   }
   catch (e) {

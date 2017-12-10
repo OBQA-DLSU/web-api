@@ -1,9 +1,7 @@
 const authenticationRouter = require('./subroutes/authentication.route');
 const invitationRouter = require('./subroutes/invitation.route');
 const courseRouter = require('./subroutes/course.route');
-
-var multer  = require('multer');
-var upload = multer();
+const sopiRouter = require('./subroutes/sopi.route');
 
 
 module.exports = (app) => {
@@ -13,4 +11,5 @@ module.exports = (app) => {
   app.use('/api/auth', authenticationRouter);
   app.use('/api/invitation', invitationRouter);
   app.use('/api/course', courseRouter);
+  app.use('/api/sopi', sopiRouter);
 };
