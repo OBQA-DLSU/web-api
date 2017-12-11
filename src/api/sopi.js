@@ -1,5 +1,3 @@
-import { Promise } from '../../../../../../../../../.cache/typescript/2.6/node_modules/@types/bluebird';
-
 const db = require('../models');
 const ErrorMessageService = require('../services/errorMessage.service');
 
