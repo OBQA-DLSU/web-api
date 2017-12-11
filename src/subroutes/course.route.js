@@ -1,7 +1,6 @@
 const express = require('express');
 const courseRouter = express.Router();
 const Course = require('../api/course');
-const xlsxj = require("xlsx-2-json");
 const fs = require('fs');
 const multer = require('multer');
 const xlsxMiddleware = require('../middlewares/xlsx.middleware');

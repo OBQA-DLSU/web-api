@@ -37,6 +37,7 @@ exports.signup = async (req, res, next) => {
     roleId = convertedCode.roleId;
     user = await db.user.create({email, fname, lname, idNumber, password, confirmation, programId, roleId },{ individualHooks: true });
     if(!user) { res.status(422).send({errorMessage: 'Invalid Credentials'}); return; }
+    db.invitationCode.destroy({ where: { invitationCode }});
     instructor = await db.instructor.create({userId: user.id, programId, status: 'ACTIVE'});
     token = await jwtService.tokenForUser(user.id);
     res.status(200).send({user, token});
