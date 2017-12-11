@@ -90,16 +90,13 @@ exports.deleteCourse = async (req, res, next) => {
 // bulk transactions
 exports.bulkAddCourse = async (req, res, next) => {
   if (!req.file) { res.status(400).send(ErrorMessageService.clientError('No File Detected')); return; }
-  // console.log(req.file);
   const { programId } = req.params;
   let jsonData, err = [], success =[];
   try {
-    // jsonData = await xlsxJsonService.parseXlsx(req.file.originalname);
     jsonData = req.payload;
     if (!jsonData || jsonData.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Invalid file or Unsupported format`)); return; }
     
     const result = await Promise.all( jsonData.map( async (data) => {
-      // const {code, name, description, toBeAssessed } = data;
       const getToBeAssessed = (data) => {
         if(data['TO BE ASSESSED'] && data['TO BE ASSESSED'].toString().toUpperCase() === 'TRUE') {
           return true;

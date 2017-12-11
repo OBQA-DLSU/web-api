@@ -1,3 +1,5 @@
+import { Promise } from '../../../../../../../../../.cache/typescript/2.6/node_modules/@types/bluebird';
+
 const db = require('../models');
 const ErrorMessageService = require('../services/errorMessage.service');
 
@@ -92,15 +94,55 @@ exports.deleteProgramSopi = async (req, res, next) => {
 // /bulk/:prograId
 
 exports.bulkCreateProgramSopi = async (req, res, next) => {
-
+  if (!req.payload) { res.status(400).send(ErrorMessageService.clientError('No File Detected')); return; }
+  const { programId } = req.params;
+  let jsonData, err = [], success =[];
+  try {
+    jsonData = req.payload;
+    if (!jsonData || jsonData.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Invalid file or Unsupported format`)); return; }
+    const result = await Promise.all(jsonData.map(async (data) => {
+      const newData = {
+        so: data['SO'],
+        code: data['SOPI'],
+        description: data['DESCRIPTION']
+      };
+      const { so, code, description } = data;
+      let createSopiResponse, sopi, createProgramSopiResponse, programSopi, finalData;
+      try {
+        sopi = await db.sopi.findOne({where: {code}});
+        if (!sopi) {
+          createSopiResponse = await sopiCreate(so, code);
+          if (!createSopiResponse) { err.push(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
+        } else {
+          createSopiResponse = sopi;
+        }
+        programSopi = await db.programSopi.findOne({where: { programId, sopiId: createSopiResponse.id }});
+        if (!programSopi) {
+          createProgramSopiResponse = await programSopiCreate(programId, createSopiResponse.id, describe);
+          if (!createProgramSopiResponse) { res.status(400).send(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
+        } else {
+          createProgramSopiResponse = programSopi;
+        }
+        finalData = await db.programSopi.findOne({ where: {id: createProgramSopi.id }, include: [{all: true}]});
+        success.push(finalData);
+      }
+      catch (e) {
+        err.push(e);
+      }
+    }));
+    res.status(200).send({success, err});
+  }
+  catch (e) {
+    res.status(500).send(ErrorMessageService.serverError());
+  }
 };
 
 exports.bulkUpdateProgramSopi = async (req, res, next) => {
-
+  res.status(200).send({message: 'This feature is not yet available.'});
 };
 
 exports.bulkDeleteProgramSopi = async (req, res, next) => {
-
+  res.status(200).send({message: 'This feature is not yet available.'});
 };
 
 // functions
