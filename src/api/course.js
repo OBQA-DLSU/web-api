@@ -89,7 +89,7 @@ exports.deleteCourse = async (req, res, next) => {
 
 // bulk transactions
 exports.bulkAddCourse = async (req, res, next) => {
-  if (!req.file) { res.status(400).send(ErrorMessageService.clientError('No File Detected')); return; }
+  if (!req.payload) { res.status(400).send(ErrorMessageService.clientError('No File Detected')); return; }
   const { programId } = req.params;
   let jsonData, err = [], success =[];
   try {

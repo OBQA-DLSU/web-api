@@ -149,7 +149,7 @@ const sopiCreate = (so, code, description) => {
   return new Promise((resolve, reject) => {
     db.sopi.create({ so, code, description }, { individualHooks: true })
     .then(result => {
-      if (!result) { reject({ errorMessage: 'Invalid Credentials.'})}
+      if (!result) { reject({ errorMessage: 'Invalid Inputs.'})}
       else { resolve(result); }
     })
     .catch(err => {
@@ -162,7 +162,7 @@ const sopiUpdate = (id, so, code, description) => {
   return new Promise((resolve, reject) => {
     db.sopi.update({ so, code, description }, { where: {id}, individualHooks: true })
     .then(result => {
-      if (!result) { reject({ errorMessage: 'Invalid Credentials.'})}
+      if (!result) { reject({ errorMessage: 'Invalid Inputs.'})}
       else { resolve(result); }
     })
     .catch(err => {
@@ -175,7 +175,7 @@ const programSopiCreate = (programId, sopiId, description) => {
   return new Promise((resolve, reject) => {
     db.programSopi.create({programId, sopiId, description}, { individualHooks: true })
     .then(result => {
-      if (!result) { reject({ errorMessage: 'Invalid Credentials.'})}
+      if (!result) { reject({ errorMessage: 'Invalid Inputs.'})}
       else { resolve(result); }
     })
     .catch(err => {
@@ -188,7 +188,7 @@ const programSopiUpdate = (id, programId, sopiId, description) => {
   return new Promise((resolve, reject) => {
     db.programSopi.update({programId, sopiId, description}, { where: {id}, individualHooks: true })
     .then(result => {
-      if (!result) { reject({ errorMessage: 'Invalid Credentials.'})}
+      if (!result) { reject({ errorMessage: 'Invalid Inputs.'})}
       else { resolve(result); }
     })
     .catch(err => {

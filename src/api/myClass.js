@@ -112,7 +112,42 @@ exports.getAllMyClass = async (req, res, next) => {
 
 // /bulk/:programId
 exports.bulkCreateMyClass = (req, res, next) => {
-
+  const { programId } = req.params;
+  if (!req.payload) { res.status(400).send(ErrorMessageService.clientError('Invalid JSON data.')); return; }
+  let jsonData, err = [], success =[];
+  try {
+    jsonData = req.payload;
+    if (!jsonData || jsonData.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Invalid JSON data`)); return; }
+    const result = await Promise.all( jsonData.map( async (data) => {
+      let course, programCourse, instructor, myClass;
+      try {
+        course = await db.course.findOne({where: {code: data['SOPI']}});
+        if (!course) { err.push(ErrorMessageService.clientError('Course not found.')); }
+        programCourse = await db.programCourse.findOne({where: {programId, courseId: course.id}});
+        if (!programCourse) { err.push(ErrorMessageService.clientError('ProgramCourse not found')); return; }
+        instructor = await db.user.findOne({where: {fname: data['INSTRUCTOR FIRSTNAME'], lname: data['INSTRUCTOR LASTNAME']}});
+        if (!instructor) { err.push(ErrorMessageService.clientError(`Instructor not found.`)); return; }
+        const newData = {
+          term: data['TERM'],
+          academicYear: data['ACADEMIC YEAR'],
+          programCourseId: programCourse.id,
+          programId: programId,
+          instructorId: instructor.id
+        };
+        const { term, academicYear, programCourseId, programId, instructorId } = newData;
+        myClass = await createMyClass(term, academicYear, programId, programCourseId, instructorId);
+        if (!myClass) { err.push(ErrorMessageService.clientError(`Failed to create new MyClass.`)); return; }
+        success.push(myClass);
+      }
+      catch (e) {
+        err.push(ErrorMessageService.serverError());
+      }
+      res.status(200).send(success, err);
+    }));
+  }
+  catch (e) {
+    res.status(500).send(ErrorMessageService.serverError());
+  }
 };
 
 exports.bulkUpdateMyClass = (req, res, next) => {
@@ -131,7 +166,7 @@ const createMyClass = (term, academicYear, programId, programCourseId, instructo
       if (result) {
         resolve(result);
       } else {
-        db.myClass.create({term, academicYear, programId, programCourseId, instructorId})
+        db.myClass.create({term, academicYear, programId, programCourseId, instructorId}, { individualHooks: true })
         .then(myClass => {
           db.myClass.findOne({where: {id: myClass.id}, include: [{all: true}]})
           .then( data => {
