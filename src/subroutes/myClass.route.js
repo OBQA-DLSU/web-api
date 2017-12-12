@@ -39,7 +39,7 @@ const uploadXlsx = multer({
 myClassRouter.route('/programMyClass/:id')
 .get(MyClass.getOneMyClass)
 .put(MyClass.updateMyClass)
-.deletee(MyClass.deleteMyClass);
+.delete(MyClass.deleteMyClass);
 
 myClassRouter.route('/bulk/:programId')
 .post(uploadXlsx.single('classes'), xlsxMiddleware.parseXLSX, MyClass.bulkCreateMyClass)
