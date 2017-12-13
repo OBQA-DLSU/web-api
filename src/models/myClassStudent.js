@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const myClassStudent = sequelize.define('myClassStudent', {
-    status: { type: DataTypes.STRING, allowNull: true }
+    status: { type: DataTypes.STRING, allowNull: true, defaultsTo: 'ACTIVE' }
   });
 
   myClassStudent.associate = models => {
