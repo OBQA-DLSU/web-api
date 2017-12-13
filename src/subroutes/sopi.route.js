@@ -38,12 +38,12 @@ const uploadXlsx = multer({
 });
 
 sopiRouter.route('/programSopi/:id')
-  .get(Sopi.getOneSopi)
+  .get(Sopi.getOneProgramSopi)
   .put(Sopi.updateProgramSopi)
   .delete(Sopi.deleteProgramSopi);
 
 sopiRouter.route('/bulk/:prograId')
-  .post(uploadXlsx.single('sopi'), xlsxMiddleware, Sopi.bulkCreateProgramSopi)
+  .post(uploadXlsx.single('sopi'), xlsxMiddleware.parseXLSX, Sopi.bulkCreateProgramSopi)
   .put(Sopi.bulkUpdateProgramSopi)
   .delete(Sopi.bulkDeleteProgramSopi);
 

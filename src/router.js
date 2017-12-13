@@ -2,8 +2,8 @@ const authenticationRouter = require('./subroutes/authentication.route');
 const invitationRouter = require('./subroutes/invitation.route');
 const courseRouter = require('./subroutes/course.route');
 const sopiRouter = require('./subroutes/sopi.route');
-const myClassRouter = require('./subroutes/myClasses.route');
-
+const myClassRouter = require('./subroutes/myClass.route');
+const studentRouter = require('./subroutes/student.route');
 
 module.exports = (app) => {
   app.get('/', function (req, res, next) {
@@ -14,4 +14,5 @@ module.exports = (app) => {
   app.use('/api/course', courseRouter);
   app.use('/api/sopi', sopiRouter);
   app.use('/api/myClass', myClassRouter);
+  app.use('/api/student', studentRouter);
 };

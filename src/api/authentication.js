@@ -15,16 +15,18 @@ exports.signin = function(req, res, next) {
   }
   res.send({user, token: jwtService.tokenForUser(req.user)});
 };
+
+// this signup is only for instructors 
 exports.signup = async (req, res, next) => {
   const { email, fname, lname, idNumber, password, confirmation, invitationCode } = req.body;
   let checkForUser, programId, roleId, convertedCode, output, codeOutput, user, instructor, token, err;
-
+  if (password !== confirmation) { res.status(422).send({errorMessage: 'Passwords do not match!'}); return; }
   try {
-    checkForUser = await db.user.findAll({where: {
+    checkForUser = await db.user.findOne({where: {
       [Op.or]: [{email}, {idNumber}]
     }});
 
-    if(checkForUser.length > 0) { res.status(422).send({errorMessage: 'Email or IdNumber is already in use'}); return; }
+    if(checkForUser && checkForUser.password) { res.status(422).send({errorMessage: 'Email or IdNumber is already in use'}); return; }
     output = await db.invitationCode.findOne({where: {
       invitationCode
     }});
@@ -35,7 +37,11 @@ exports.signup = async (req, res, next) => {
     convertedCode = invitationCodeService.readCode(codeOutput);
     programId = convertedCode.programId;
     roleId = convertedCode.roleId;
-    user = await db.user.create({email, fname, lname, idNumber, password, confirmation, programId, roleId },{ individualHooks: true });
+    if(checkForUser) {
+      user = await db.user.update({fname, lname, password}, { where: {id: checkForUser.id}, individualHooks: true});
+    } else {
+      user = await db.user.create({email, fname, lname, idNumber, password, programId, roleId },{ individualHooks: true });
+    }
     if(!user) { res.status(422).send({errorMessage: 'Invalid Credentials'}); return; }
     db.invitationCode.destroy({ where: { invitationCode }});
     instructor = await db.instructor.create({userId: user.id, programId, status: 'ACTIVE'});
@@ -45,7 +51,7 @@ exports.signup = async (req, res, next) => {
   }
   catch(e) {
     console.log(e);
-    res.status(500).send({errorMessage: e});
+    res.status(500).send({errorMessage: 'There is a server Error.'});
     return;
   }
 }

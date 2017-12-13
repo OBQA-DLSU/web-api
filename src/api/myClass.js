@@ -111,7 +111,7 @@ exports.getAllMyClass = async (req, res, next) => {
 };
 
 // /bulk/:programId
-exports.bulkCreateMyClass = (req, res, next) => {
+exports.bulkCreateMyClass = async (req, res, next) => {
   const { programId } = req.params;
   if (!req.payload) { res.status(400).send(ErrorMessageService.clientError('Invalid JSON data.')); return; }
   let jsonData, err = [], success =[];

@@ -124,9 +124,10 @@ exports.bulkAddCourse = async (req, res, next) => {
         programCourse = await db.programCourse.findOne({where: {programId, courseId: course.id}});
         if(!programCourse) {
           addProgramCourseResponse = await programCourseCreate(programId, course.id, toBeAssessed, description);
-          if(!programCourseResponse) { res.status(400).send(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
+          if(!programCourseResponse) { err.push(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
         } else {
-          addProgramCourseResponse = programCourse;
+          addProgramCourseResponse = await programCourseUpdate(programCourse.id, programId, course.id, descripton);
+          if(!programCourseResponse) { err.push(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
         }
         success.push(addProgramCourseResponse, addCourseResponse);
       }
@@ -134,7 +135,6 @@ exports.bulkAddCourse = async (req, res, next) => {
         err.push(e);
       }
     }));
-
     res.status(200).send({success, err});
   }
   catch (e) {
