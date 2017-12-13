@@ -117,9 +117,11 @@ exports.bulkCreateProgramSopi = async (req, res, next) => {
         programSopi = await db.programSopi.findOne({where: { programId, sopiId: createSopiResponse.id }});
         if (!programSopi) {
           createProgramSopiResponse = await programSopiCreate(programId, createSopiResponse.id, describe);
-          if (!createProgramSopiResponse) { res.status(400).send(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
+          if (!createProgramSopiResponse) { err.push(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
         } else {
-          createProgramSopiResponse = programSopi;
+          createProgramSopiResponse = await programSopiUpdate(programSopi.id, programId, sopi.id, description);
+          if (!createProgramSopiResponse) { err.push(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
+
         }
         finalData = await db.programSopi.findOne({ where: {id: createProgramSopi.id }, include: [{all: true}]});
         success.push(finalData);
