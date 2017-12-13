@@ -42,7 +42,7 @@ sopiRouter.route('/programSopi/:id')
   .put(Sopi.updateProgramSopi)
   .delete(Sopi.deleteProgramSopi);
 
-sopiRouter.route('/bulk/:prograId')
+sopiRouter.route('/bulk/:programId')
   .post(uploadXlsx.single('sopi'), xlsxMiddleware.parseXLSX, Sopi.bulkCreateProgramSopi)
   .put(Sopi.bulkUpdateProgramSopi)
   .delete(Sopi.bulkDeleteProgramSopi);
