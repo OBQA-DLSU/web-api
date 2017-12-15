@@ -50,7 +50,6 @@ exports.signup = async (req, res, next) => {
     return;
   }
   catch(e) {
-    console.log(e);
     res.status(500).send({errorMessage: 'There is a server Error.'});
     return;
   }
