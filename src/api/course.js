@@ -63,7 +63,7 @@ exports.updateCourse = async (req, res, next) => {
     if (!programCourse) { res.status(400).send(ErrorMessageService.clientError(`Program Course ID: ${id} not found.`)); return; }
     else {
       updateCourseResponse = await courseUpdate(programCourse.courseId, name, code);
-      updateProgramCourseResponse = await programCourseUpdate(id, programCourse.programId, programCourse.courseId, (JSON.parse(toBeAssessed) === true)? true : false);
+      updateProgramCourseResponse = await programCourseUpdate(id, programCourse.programId, programCourse.courseId, (JSON.parse(toBeAssessed) === true) ? true : false);
     }
     if (!updateCourseResponse || !updateProgramCourseResponse) { res.status(400).send(ErrorMessageService.clientError(`Proccess Error.`)); return; }
     updatedProgramCourse = await db.programCourse.find({where: {id}, include: [{all:true}]});

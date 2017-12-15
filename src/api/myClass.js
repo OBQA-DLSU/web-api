@@ -17,10 +17,10 @@ exports.getOneMyClass = async (req, res, next) => {
 
 exports.updateMyClass = async (req, res, next) => {
   const { id } = req.params;
-  const { term, academicYear, programId, programCourseId, instructorId } = req.body;
+  const { term, academicYear, cycle, programId, programCourseId, instructorId } = req.body;
   let myClass;
   try {
-    myClass = await updateMyClass(id, term, academicYear, programId, programCourseId);
+    myClass = await updateMyClass(id, term, academicYear, cycle, programId, programCourseId);
     if (!myClass) { res.status(400).send(ErrorMessageService.clientError(`Invalid Input`)); return; }
     res.status(200).send(myClass);
   }
@@ -57,10 +57,10 @@ exports.getMyClass = async (req, res, next) => {
 
 exports.createMyClass = async (req, res, next) => {
   const { programId } = req.params;
-  const { term, academicYear, programCourseId, instructorId } = req.body;
+  const { term, academicYear, cycle, programCourseId, instructorId } = req.body;
   let myClass;
   try {
-    myClass = await createMyClass(term, academicYear, programId, programCourseId, instructorId);
+    myClass = await createMyClass(term, academicYear, cycle, programId, programCourseId, instructorId);
     if (myClass) { res.status(400).send(ErrorMessageService.clientError('Invalid Input.')); return; }
     res.status(200).send(myClass);
   }
@@ -114,38 +114,45 @@ exports.getAllMyClass = async (req, res, next) => {
 exports.bulkCreateMyClass = async (req, res, next) => {
   const { programId } = req.params;
   if (!req.payload) { res.status(400).send(ErrorMessageService.clientError('Invalid JSON data.')); return; }
+  console.log(req.payload);
   let jsonData, err = [], success =[];
   try {
     jsonData = req.payload;
     if (!jsonData || jsonData.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Invalid JSON data`)); return; }
     const result = await Promise.all( jsonData.map( async (data) => {
-      let course, programCourse, instructor, myClass;
+      let course, programCourse, instructor, myClass, user;
       try {
-        course = await db.course.findOne({where: {code: data['SOPI']}});
+        course = await db.course.findOne({where: {code: data['COURSE']}});
         if (!course) { err.push(ErrorMessageService.clientError('Course not found.')); }
         programCourse = await db.programCourse.findOne({where: {programId, courseId: course.id}});
         if (!programCourse) { err.push(ErrorMessageService.clientError('ProgramCourse not found')); return; }
-        instructor = await db.user.findOne({where: {fname: data['INSTRUCTOR FIRSTNAME'], lname: data['INSTRUCTOR LASTNAME']}});
+        user = await db.user.findOne({where: {fname: data['FIRSTNAME OF INSTRUCTOR'], lname: data['LASTNAME OF INSTRUCTOR']}, include: [db.instructor], raw: true});
+        console.log(user);
+        if (!user) { err.push(ErrorMessageService.clientError(`User ${data['FIRSTNAME OF INSTRUCTOR']} not found`)); return; }
+        instructor = await db.instructor.findOne({where: {userId: user.id}});
         if (!instructor) { err.push(ErrorMessageService.clientError(`Instructor not found.`)); return; }
+        
         const newData = {
-          term: data['TERM'],
+          term: parseInt(data['TERM']),
           academicYear: data['ACADEMIC YEAR'],
+          cycle: parseInt(data['CYCLE']),
           programCourseId: programCourse.id,
-          programId: programId,
           instructorId: instructor.id
         };
-        const { term, academicYear, programCourseId, programId, instructorId } = newData;
-        myClass = await createMyClass(term, academicYear, programId, programCourseId, instructorId);
+        const { term, academicYear, cycle, programCourseId, instructorId } = newData;
+        myClass = await createMyClass(term, academicYear, cycle, programId, programCourseId, instructorId);
         if (!myClass) { err.push(ErrorMessageService.clientError(`Failed to create new MyClass.`)); return; }
         success.push(myClass);
       }
       catch (e) {
+        console.log(e);
         err.push(ErrorMessageService.serverError());
       }
-      res.status(200).send(success, err);
     }));
+    res.status(200).send({err, success});
   }
   catch (e) {
+    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
@@ -159,14 +166,14 @@ exports.bulkDeleteMyClass = (req, res, next) => {
 }
 
 // functions
-const createMyClass = (term, academicYear, programId, programCourseId, instructorId) => {
+const createMyClass = (term, academicYear, cycle, programId, programCourseId, instructorId) => {
   return new Promise((resolve, reject) => {
-    db.myClass.findOne({where: {term, academicYear, programId, programCourseId, instructorId}, include: [{all: true}]})
+    db.myClass.findOne({where: {term, academicYear, cycle, programId, programCourseId, instructorId}, include: [{all: true}]})
     .then(result => {
       if (result) {
         resolve(result);
       } else {
-        db.myClass.create({term, academicYear, programId, programCourseId, instructorId}, { individualHooks: true })
+        db.myClass.create({term, academicYear, cycle, programId, programCourseId, instructorId}, { individualHooks: true })
         .then(myClass => {
           db.myClass.findOne({where: {id: myClass.id}, include: [{all: true}]})
           .then( data => {
@@ -187,11 +194,11 @@ const createMyClass = (term, academicYear, programId, programCourseId, instructo
   });
 };
 
-const updateMyClass = (id, term, academicYear, programId, programCourseId, instructorId) => {
+const updateMyClass = (id, term, academicYear, cycle, programId, programCourseId, instructorId) => {
   return new Promise((resolve, reject) => {
-    db.myClass.update({term, academicYear, programId, programCourseId, instructorId}, {where:{id}, individualHooks: true})
+    db.myClass.update({term, academicYear, cycle, programId, programCourseId, instructorId}, {where:{id}, returning: true, individualHooks: true})
     .then(result => {
-      db.myClass.findOne({where: {id: result.id}, include: [{ all: true }]})
+      db.myClass.findOne({where: {id: result[0][1].id}, include: [{ all: true }]})
       .then(data => {
         resolve(data);
       })
@@ -224,6 +231,7 @@ const getFilteredMyClassPerProgram = (programId, filterName, filterValue) => {
     case 'ACADEMICYEAR': filter = { academicYear: filterValue, programId };
     case 'PROGRAMCOURSEID': filter = { programCourseId: filterValue, programId };
     case 'INSTRUCTORID': filter = { instructorId: filterValue, programId };
+    case 'CYCLE': filter = { cycle: filterValue, programId };
     default: filter = { id: filterValue };
   }
   return new Promise((resolve, reject) => {
@@ -246,6 +254,7 @@ const getFilteredMyClass = (filterName, filterValue) => {
     case 'PROGRAMID': filter = { programId: filterValue };
     case 'PROGRAMCOURSEID': filter = { programCourseId: filterValue };
     case 'INSTRUCTORID': filter = { instructorId: filterValue };
+    case 'CYCLE': filter = { cycle: filterValue };
     default: filter = { id: filterValue };
   }
   return new Promise((resolve, reject) => {
@@ -263,7 +272,7 @@ const deleteMyClass = (id) => {
   return new Promise((resolve, reject) => {
     db.myClass.destroy({where: {id}, individualHooks: true})
     .then(result => {
-      resolev(result);
+      resolve(result);
     })
     .catch(err => {
       reject(err);

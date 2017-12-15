@@ -5,25 +5,23 @@ const secretKeys = require('../../secret-keys');
 exports.invitation = async (req, res, next) => {
   console.log(req.body);
   // this should be an array of invitations
-  let error = [];
+  let error = [], success = [];
   // loop trough invitationData
   try {
     const result = await Promise.all(req.body.map( async(data) => {
       const errorMessage = 'There is an error occured while looping trough the array';
       const { email, program, role } = data;
       const invitationCode = await getCode(program, role);
-      if (!invitationCode) { error.push({errorCode: 422, errorMessage })}
+      if (!invitationCode) { error.push({ errorMessage })}
       if (invitationCode.errorCode) { error.push(invitationCode) }
       const invitationResult = await invite(email, invitationCode);
-      if (!invitationResult) { error.push({errorCode: 422, errorMessage })}
-      if (invitationCode.errorCode) { error.push({errorCode:422, errorMessage})}
-      return invitationResult;
+      if (!invitationResult) { error.push({ errorMessage })}
+      if (invitationCode.errorCode) { error.push({errorMessage})}
+      success.push(invitationResult);
     }));
-    if (!result) { res.status(422).send({errorMessage: 'There is an error occured while inviting users.'}); return;}
-    res.status(200).send({success: result, error});
+    res.status(200).send({success, error});
   }
   catch (e) {
-    console.log(e);
     res.status(500).send(e);
   }
 };
@@ -34,15 +32,15 @@ const getCode = (program, role) => {
     let invitationCode;
     const code = invitationCodeService.convertToCode(program, role);
     if(!code) {
-      reject({ errorCode: 422, errorMessage: 'Invalid Program or Role'});
+      reject({ errorMessage: 'Invalid Program or Role'});
     }
     try {
       invitationCode = await db.invitationCode.create({code});
-      if (!invitationCode) { reject({ errorCode: 422, errorMessage: 'Invalid Program or Role'});}
+      if (!invitationCode) { reject({ errorMessage: 'Invalid Program or Role'});}
       resolve(invitationCode.invitationCode);
     }
     catch (e) {
-      reject({ errorCode: 500,errorMessage: 'Internal server error' });
+      reject({ errorMessage: 'Internal server error' });
     }
   });
 };
@@ -58,11 +56,11 @@ const invite = (email, invitationCode) => {
     };
     try {
       const mailResponse = await sgMail.send(msg);
-      if (!mailResponse) { reject({ errorCode: 422, errorMessage: 'Invalid Credentials' }) }
+      if (!mailResponse) { reject({ errorMessage: 'Invalid Credentials' }) }
       resolve({ message: `Successfully sent invite to ${email}` });
     }
     catch (e) {
-      reject({ errorCode: 500,errorMessage: 'Internal server error' });
+      reject({ errorMessage: 'Internal server error' });
     }
   });
 };
