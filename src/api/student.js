@@ -25,7 +25,6 @@ exports.getMyClassStudent = async (req, res, next) => {
     res.status(200).send({student: myClass['students']});
   }
   catch (e) {
-    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
@@ -48,7 +47,7 @@ exports.createMyClassStudent = async (req, res, next) => {
     if (!student) { res.status(400).send(ErrorMessageService.clientError(`Student was not created.`)); return; }
     myClassStudent = await db.myClassStudent.create({myClassId, studentId: student.id}, {individualHooks:true});
     if (!myClassStudent) { res.status(400).send(ErrorMessageService.clientError(`Student was not enrolled.`)); return; }
-    enrolledStudent = await db.myClassStudent.findOne({where: {myClassId, studentId: myClassStudent.id}}, {include: [{ model: db.student, include:[{all: true}]}]});
+    enrolledStudent = await db.myClassStudent.findOne({where: {myClassId, studentId: myClassStudent.id}}, {include: [{ model: db.student, include:[{ model: db.user, attributes: ['idNumber', 'lname', 'fname', 'id', 'email'] }]}, { model: db.program }]});
     res.status(200).send({student: enrolledStudent.student});
   }
   catch (e) {
@@ -61,7 +60,7 @@ exports.getStudentByProgram = async (req, res, next) => {
   const { programId } = req.params;
   let student;
   try {
-    student = await db.student.findAll({ where: {programId}, include: [{all:true}] });
+    student = await db.student.findAll({ where: {programId}, include: [{ model: db.user, attributes: ['idNumber', 'lname', 'fname', 'id', 'email'] }, { model: db.program }] });
     res.status(200).send({student});
   }
   catch (e) {
