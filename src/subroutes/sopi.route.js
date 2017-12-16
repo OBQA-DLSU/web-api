@@ -1,6 +1,6 @@
 const express = require('express');
-const courseRouter = express.Router();
-const Course = require('../api/course');
+const sopiRouter = express.Router();
+const Sopi = require('../api/sopi');
 const fs = require('fs');
 const multer = require('multer');
 const xlsxMiddleware = require('../middlewares/xlsx.middleware');
@@ -37,21 +37,18 @@ const uploadXlsx = multer({
 	}
 });
 
-courseRouter.route('/programCourse/:id')
-	.get(Course.getOneCourse)
-	.put(Course.updateCourse)
-	.delete(Course.deleteCourse);
+sopiRouter.route('/programSopi/:id')
+  .get(Sopi.getOneProgramSopi)
+  .put(Sopi.updateProgramSopi)
+  .delete(Sopi.deleteProgramSopi);
 
-courseRouter.route('/bulk/:programId')
-	.post(uploadXlsx.single('file'), xlsxMiddleware.parseXLSX, Course.bulkAddCourse)
-	.put(Course.bulkUpdateCourse)
-	.delete(Course.bulkDeleteCourse);
+sopiRouter.route('/bulk/:programId')
+  .post(uploadXlsx.single('sopi'), xlsxMiddleware.parseXLSX, Sopi.bulkCreateProgramSopi)
+  .put(Sopi.bulkUpdateProgramSopi)
+  .delete(Sopi.bulkDeleteProgramSopi);
 
-courseRouter.route('/:programId')
-	.get(Course.getCourse);
+sopiRouter.route('/:programId')
+  .get(Sopi.getProgramSopi)
+  .post(Sopi.createProgramSopi);
 
-courseRouter.route('/:programId/:toBeAssessed')
-	.post(Course.addCourse);
-
-module.exports = courseRouter;
-
+module.exports = sopiRouter;

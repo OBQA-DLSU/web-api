@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     performance: { type: DataTypes.DOUBLE, allowNull: true },
     improvementPlan: { type: DataTypes.STRING, allowNull: true },
     term: { type: DataTypes.INTEGER, allowNull: false },
-    academicYear: { type: DataTypes.INTEGER, allowNull: false, validate: { len: [9] } }
+    academicYear: { type: DataTypes.STRING, allowNull: false, validate: { len: [9] } },
+    cycle: { type: DataTypes.INTEGER, allowNull: false }
   });
 
   assessment.associate = models => {

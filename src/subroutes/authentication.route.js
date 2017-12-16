@@ -10,5 +10,4 @@ authRoute.route('/signin')
 authRoute.route('/signup')
 .post(Authentication.signup);
 
-
 module.exports = authRoute;
