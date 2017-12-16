@@ -35,7 +35,7 @@ const jwtOptions = {
 };
 
 const jwtLogin = new JwtStrategy(jwtOptions, function (payload, done) {
-  console.log(payload);
+  
   user.findOne({
     where:{
       id: payload.sub
