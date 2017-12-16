@@ -17,7 +17,7 @@ const localLogin = new LocalStrategy(localOptions, function (email, password, do
   .then(user => {
     if(!user){return done(null, false);}
 
-    bcrypt.compare(password, user.encryptedPassword, function(err, isMatch) {
+    bcrypt.compare(password, user.password, function(err, isMatch) {
       if (err) {return done(err);}
       if (!isMatch) {return done(null, false);}
       return done(null, user);

@@ -8,7 +8,7 @@ exports.getOneMyClass = async (req, res, next) => {
   try {
     myClass = await db.myClass.findOne({ where: {id}, include: [{all: true}]});
     if (!myClass) { res.status(400).send(ErrorMessageService.clientError(`MyClass ID: ${id} is not existing.`)); return; }
-    res.status(200).send(myClass);
+    res.status(200).send({myClass});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -22,7 +22,7 @@ exports.updateMyClass = async (req, res, next) => {
   try {
     myClass = await updateMyClass(id, term, academicYear, cycle, programId, programCourseId);
     if (!myClass) { res.status(400).send(ErrorMessageService.clientError(`Invalid Input`)); return; }
-    res.status(200).send(myClass);
+    res.status(200).send({myClass});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -48,7 +48,7 @@ exports.getMyClass = async (req, res, next) => {
   try {
     myClasses = await db.myClass.findAll({where: {programId}, include: [{all: true}]});
     if (!myClasses) { res.status(400).send(ErrorMessageService.clientError('Invalid Program ID.')); return; }
-    res.status(200).send(myClasses);
+    res.status(200).send({myClasses});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -62,7 +62,7 @@ exports.createMyClass = async (req, res, next) => {
   try {
     myClass = await createMyClass(term, academicYear, cycle, programId, programCourseId, instructorId);
     if (myClass) { res.status(400).send(ErrorMessageService.clientError('Invalid Input.')); return; }
-    res.status(200).send(myClass);
+    res.status(200).send({myClass});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -76,7 +76,7 @@ exports.getMyClassPerProgramFiltered = async (req, res, next) => {
   try {
     myClasses = await getFilteredMyClassPerProgram(programId, filterName, filterValue);
     if (!myClasses) { res.status(400).send(ErrorMessageService.clientError(`Cannot find Classes for Program ID: ${programId}.`)); return; }
-    res.status(200).send(myClasses);
+    res.status(200).send({myClasses});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -90,7 +90,7 @@ exports.getMyClassFiltered = async (req, res, next) => {
   try {
     myClasses = await getFilteredMyClass(filterName, filterValue);
     if (!myClasses) { res.status(400).send('Cannot find classes on specified filters.'); return; }
-    res.status(200).send(myClasses);
+    res.status(200).send({myClasses});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -103,7 +103,7 @@ exports.getAllMyClass = async (req, res, next) => {
   try {
     myClasses = await db.myClass.findAll({include: [{all: true}]});
     if (!myClasses) { res.status(400).send(ErrorMessageService.clientError('Cannot find Classes.')); return; }
-    res.status(200).send(myClasses);
+    res.status(200).send({myClasses});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());

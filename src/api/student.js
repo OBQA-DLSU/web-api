@@ -8,7 +8,7 @@ exports.getAllStudent = async (req, res, next) => {
   try {
     user = await db.user.findAll({where: {}, include: [ {model: db.student, include: [{all:true}]}]});
     student = _.filter(user, (u) => { return u['students'].length > 0 });
-    res.status(200).send(student);
+    res.status(200).send({student});
   }
   catch (e) {
     res.status(500).send(e);
@@ -22,7 +22,7 @@ exports.getMyClassStudent = async (req, res, next) => {
   try {
     myClass = await db.myClass.findOne({where: {id: myClassId}, include: [{model: db.myClassStudent}]});
     if (!myClass || myClass['myClassStudents'].length === 0) { res.status(400).send(ErrorMessageService.clientError(`There are no students on Class ID: ${myClassId}.`)); return; }
-    res.status(200).send(myClass['students']);
+    res.status(200).send({student: myClass['students']});
   }
   catch (e) {
     console.log(e);
@@ -49,7 +49,7 @@ exports.createMyClassStudent = async (req, res, next) => {
     myClassStudent = await db.myClassStudent.create({myClassId, studentId: student.id}, {individualHooks:true});
     if (!myClassStudent) { res.status(400).send(ErrorMessageService.clientError(`Student was not enrolled.`)); return; }
     enrolledStudent = await db.myClassStudent.findOne({where: {myClassId, studentId: myClassStudent.id}}, {include: [{ model: db.student, include:[{all: true}]}]});
-    res.status(200).send(enrolledStudent.student);
+    res.status(200).send({student: enrolledStudent.student});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -62,7 +62,7 @@ exports.getStudentByProgram = async (req, res, next) => {
   let student;
   try {
     student = await db.student.findAll({ where: {programId}, include: [{all:true}] });
-    res.status(200).send(student);
+    res.status(200).send({student});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -78,7 +78,7 @@ exports.getStudentById = async (req, res, next) => {
   try {
     student = await db.findOne({where: {id}, include: [{all: true}]});
     if (!student) { res.status(400).send(ErrorMessageService.clientError(`Student ID: ${id} does not exist.`)); return; }
-    res.status(200).send(student);
+    res.status(200).send({student});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -105,7 +105,7 @@ exports.deleteStudent = async (req, res, next) => {
     if (!checkStudent) { res.status(400).send(ErrorMessageService.clientError(`Student ID: ${id} not existing.`)); return; }
     student = await db.student.destroy({where: {id}, individualHooks: true});
     if (!student) { res.status(400).send(ErrorMessageService.clientError('There is a problem in deleting Student')); return; }
-    res.status(200).send(student);
+    res.status(200).send({student});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError);

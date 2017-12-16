@@ -7,7 +7,7 @@ exports.getCourse = async (req, res, next) => {
   try {
     programCourses = await db.programCourse.findAll({ where: { programId }, include: [ { all: true } ] });
     if(!programCourses || programCourses.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Cannot find Course for Program ID: ${programId}`)); return; }
-    res.status(200).send(programCourses);
+    res.status(200).send({programCourses});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -34,7 +34,7 @@ exports.addCourse = async (req, res, next) => {
       addProgramCourseResponse = programCourse;
     }
     finalProgramCourse = await db.programCourse.findOne({ where: {id: addProgramCourseResponse.id }, include: [{all:true}]});
-    res.status(200).send(finalProgramCourse);
+    res.status(200).send({finalProgramCourse});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -47,7 +47,7 @@ exports.getOneCourse = async (req, res, next) => {
   try {
     programCourse = await db.programCourse.findOne({ where: { id }, include: [ {all:true} ]});
     if(!programCourse) { res.status(400).send(ErrorMessageService.clientError(`Cannot find Course ID: ${id}`)); return; }
-    res.status(200).send(programCourse);
+    res.status(200).send({programCourse});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -68,7 +68,7 @@ exports.updateCourse = async (req, res, next) => {
     if (!updateCourseResponse || !updateProgramCourseResponse) { res.status(400).send(ErrorMessageService.clientError(`Proccess Error.`)); return; }
     updatedProgramCourse = await db.programCourse.find({where: {id}, include: [{all:true}]});
     if (!updatedProgramCourse) { res.status(400).send(ErrorMessageService.clientError(`Proccess Error.`)); return; }
-    res.status(200).send(result);
+    res.status(200).send({result});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());

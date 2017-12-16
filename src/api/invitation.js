@@ -10,8 +10,8 @@ exports.invitation = async (req, res, next) => {
   try {
     const result = await Promise.all(req.body.map( async(data) => {
       const errorMessage = 'There is an error occured while looping trough the array';
-      const { email, program, role } = data;
-      const invitationCode = await getCode(program, role);
+      const { email, programId, roleId, isAdmin, isStudent } = data;
+      const invitationCode = await getCode(programId, roleId, isAdmin, isStudent);
       if (!invitationCode) { error.push({ errorMessage })}
       if (invitationCode.errorCode) { error.push(invitationCode) }
       const invitationResult = await invite(email, invitationCode);
@@ -27,10 +27,10 @@ exports.invitation = async (req, res, next) => {
 };
 
 // functions
-const getCode = (program, role) => {
+const getCode = (programId, roleId, isAdmin, isStudent) => {
   return new Promise( async (resolve, reject) => {
     let invitationCode;
-    const code = invitationCodeService.convertToCode(program, role);
+    const code = invitationCodeService.convertToCode(programId, roleId, isAdmin, isStudent);
     if(!code) {
       reject({ errorMessage: 'Invalid Program or Role'});
     }

@@ -1,5 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const instructor = sequelize.define('instructor', {
+    isAdmin: { type: DataTypes.BOOLEAN, defaultsTo: false },
     status: { type: DataTypes.STRING, allowNull: true, defaultsTo: 'ACTIVE' }
   });
 

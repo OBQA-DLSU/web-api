@@ -8,7 +8,7 @@ exports.getProgramSopi = async (req, res, next) => {
   try {
     programSopi = await db.programSopi.findAll({where: { programId }, include: [ {model: db.program}, {model: db.sopi, include: [db.so]} ]});
     if (!programSopi || programSopi.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Program SOPIs with ID ${programId} are not existing.`)); return; }
-    res.status(200).send(programSopi);
+    res.status(200).send({programSopi});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -35,7 +35,7 @@ exports.createProgramSopi = async (req, res, next) => {
       createProgramSopiResponse = programSopi;
     }
     finalProgramSopi = await db.programSopi.findOne({ where: { id: programSopi.id }, include: [{model: db.program}, {model: db.sopi, include: [{model: db.so}]}]});
-    res.status(200).send(finalProgramSopi);
+    res.status(200).send({programSopi: finalProgramSopi});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -49,7 +49,7 @@ exports.getOneProgramSopi = async (req, res, next) => {
   try {
     programSopi = await db.programSopi.findOne({ where: { id }, include: [{model: db.program}, {model: db.sopi, include: [{model: db.so}]}]});
     if (!programSopi) { res.status(400).send(ErrorMessageService.clientError(`Program Sopi with ID: ${id} is not existing.`)); return;}
-    res.status(200).send(programSopi);
+    res.status(200).send({programSopi});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -71,7 +71,7 @@ exports.updateProgramSopi = async (req, res, next) => {
     if (!updateSopiResponse || !updateProgramSopiResponse) { res.status(400).send(ErrorMessageService.clientError(`Process Error.`)); return; }
     updatedProgramSopi = await db.programSopi.findOne({ where: { id }, include: [{model: db.program}, {model: db.sopi, include: [{model: db.so}]}]});
     if (!updatedProgramSopi) { res.status(400).send(ErrorMessageService.clientError(`Process Error.`)); return;}
-    res.status(200).send(updatedProgramSopi);
+    res.status(200).send({programSopi: updatedProgramSopi});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
