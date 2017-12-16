@@ -20,8 +20,12 @@ module.exports = (sequelize, DataTypes) => {
     if (user.email && user.password) {
       const salt = bcrypt.genSaltSync(10);
       user.password = bcrypt.hashSync(user.password, salt);
-    } else {
-      throw new Error('Please check your password');
+    }
+  });
+  user.beforeUpdate(user => {
+    if (user.email && user.password) {
+      const salt = bcrypt.genSaltSync(10);
+      user.password = bcrypt.hashSync(user.password, salt);
     }
   });
   return user;

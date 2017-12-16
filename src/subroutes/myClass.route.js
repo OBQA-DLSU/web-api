@@ -1,7 +1,6 @@
 const express = require('express');
-const courseRouter = express.Router();
-const Course = require('../api/course');
-const fs = require('fs');
+const myClassRouter = express.Router();
+const MyClass = require('../api/myClass');
 const multer = require('multer');
 const xlsxMiddleware = require('../middlewares/xlsx.middleware');
 
@@ -37,21 +36,28 @@ const uploadXlsx = multer({
 	}
 });
 
-courseRouter.route('/programCourse/:id')
-	.get(Course.getOneCourse)
-	.put(Course.updateCourse)
-	.delete(Course.deleteCourse);
+myClassRouter.route('/programMyClass/:id')
+.get(MyClass.getOneMyClass)
+.put(MyClass.updateMyClass)
+.delete(MyClass.deleteMyClass);
 
-courseRouter.route('/bulk/:programId')
-	.post(uploadXlsx.single('file'), xlsxMiddleware.parseXLSX, Course.bulkAddCourse)
-	.put(Course.bulkUpdateCourse)
-	.delete(Course.bulkDeleteCourse);
+myClassRouter.route('/bulk/:programId')
+.post(uploadXlsx.single('classes'), xlsxMiddleware.parseXLSX, MyClass.bulkCreateMyClass)
+.put(MyClass.bulkUpdateMyClass)
+.delete(MyClass.bulkDeleteMyClass);
 
-courseRouter.route('/:programId')
-	.get(Course.getCourse);
+myClassRouter.route('/filteredByProgramId/:programId/:filterName/:filterValue')
+.get(MyClass.getMyClassPerProgramFiltered);
 
-courseRouter.route('/:programId/:toBeAssessed')
-	.post(Course.addCourse);
+myClassRouter.route('/all/')
+.get(MyClass.getAllMyClass)
 
-module.exports = courseRouter;
+myClassRouter.route('/:programId')
+.get(MyClass.getMyClass)
+.post(MyClass.createMyClass);
 
+myClassRouter.route('/:filterName/:filterValue')
+.get(MyClass.getMyClassFiltered)
+
+
+module.exports = myClassRouter;
