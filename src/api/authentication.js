@@ -66,8 +66,19 @@ exports.signup = async (req, res, next) => {
     } else {
       student = await db.student.create({userId: user.id, programId, isAdmin, status: 'ACTIVE'});
     }
-    const userFinal = await db.user.findOne({where: {id: user.id}, include: [ {model: db.role }, {model: db.instructor}, {model: db.student} ]});
-    token = await jwtService.tokenForUser(user.id);
+    const checkUser = await db.user.findOne({where: {id: user.id}, include: [ {model: db.role }, {model: db.instructor}, {model: db.student} ]});
+    userFinal = {
+      id: checkUser.id,
+      idNumber: checkUser.idNumber,
+      email: checkUser.email,
+      lname: checkUser.lname,
+      fname: checkUser.fname,
+      roleId: checkUser.roleId,
+      role: checkUser.role,
+      instructor: checkUser['instructors'],
+      student: checkUser['students']
+    };
+    token = jwtService.tokenForUser(user);
     res.status(200).send({user: userFinal, token});
     return;
   }
