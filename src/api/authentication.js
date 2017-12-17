@@ -21,12 +21,12 @@ exports.signin = async function(req, res, next) {
       instructor: checkUser['instructors'],
       student: checkUser['students']
     };
-    if (!user) { res.status(400).send({errorMessage: `Invalid User.`}); return; }
+    if (!user) { res.status(400).send(`Invalid User.`); return; }
     res.status(200).send({user, token: jwtService.tokenForUser(req.user)});
   }
   catch (e) {
     console.log(e);
-    res.status(500).send({errorMessage: `Internal server error.`});
+    res.status(500).send(`Internal server error.`);
   }
 };
 
@@ -34,18 +34,18 @@ exports.signin = async function(req, res, next) {
 exports.signup = async (req, res, next) => {
   const { email, fname, lname, idNumber, password, confirmation, invitationCode } = req.body;
   let checkForUser, programId, roleId, isAdmin, isStudent, convertedCode, output, codeOutput, user, instructor, token, err;
-  if (password !== confirmation) { res.status(422).send({errorMessage: 'Passwords do not match!'}); return; }
+  if (password !== confirmation) { res.status(422).send('Passwords do not match!'); return; }
   try {
     checkForUser = await db.user.findOne({where: {
       [Op.or]: [{email}, {idNumber}]
     }});
 
-    if(checkForUser && checkForUser.password) { res.status(422).send({errorMessage: 'Email or IdNumber is already in use'}); return; }
+    if(checkForUser && checkForUser.password) { res.status(422).send('Email or IdNumber is already in use'); return; }
     output = await db.invitationCode.findOne({where: {
       invitationCode
     }});
 
-    if(!output) { res.status(422).send({errorMessage: 'Invalid Invitation code.'}); return; }
+    if(!output) { res.status(422).send('Invalid Invitation code.'); return; }
 
     codeOutput = output.code;
     convertedCode = invitationCodeService.readCode(codeOutput);
@@ -59,7 +59,7 @@ exports.signup = async (req, res, next) => {
     } else {
       user = await db.user.create({email, fname, lname, idNumber, password, roleId },{ individualHooks: true });
     }
-    if(!user) { res.status(422).send({errorMessage: 'Invalid Credentials'}); return; }
+    if(!user) { res.status(422).send('Invalid Credentials'); return; }
     const destroy = await db.invitationCode.destroy({ where: { invitationCode }});
     if (!user.isStudent) {
       instructor = await db.instructor.create({userId: user.id, programId, isAdmin, status: 'ACTIVE'});
@@ -83,7 +83,8 @@ exports.signup = async (req, res, next) => {
     return;
   }
   catch(e) {
-    res.status(500).send({errorMessage: 'There is a server Error.'});
+    console.log(e);
+    res.status(500).send('There is a server Error.');
     return;
   }
 }
