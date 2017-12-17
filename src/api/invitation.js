@@ -2,6 +2,7 @@ const sgMail = require('@sendgrid/mail');
 const db = require('../models');
 const invitationCodeService = require('../services/invitationCode.service');
 const secretKeys = require('../../secret-keys');
+const ErrorMessageService = require('../services/errorMessage.service');
 exports.invitation = async (req, res, next) => {
   console.log(req.body);
   // this should be an array of invitations
@@ -22,7 +23,7 @@ exports.invitation = async (req, res, next) => {
     res.status(200).send({success, error});
   }
   catch (e) {
-    res.status(500).send(e);
+    res.status(500).send(ErrorMessageService.serverError());
   }
 };
 
@@ -40,7 +41,7 @@ const getCode = (programId, roleId, isAdmin, isStudent) => {
       resolve(invitationCode.invitationCode);
     }
     catch (e) {
-      reject({ errorMessage: 'Internal server error' });
+      reject(ErrorMessageService.serverError());
     }
   });
 };
@@ -60,7 +61,7 @@ const invite = (email, invitationCode) => {
       resolve({ message: `Successfully sent invite to ${email}` });
     }
     catch (e) {
-      reject({ errorMessage: 'Internal server error' });
+      reject(ErrorMessageService.serverError());
     }
   });
 };
