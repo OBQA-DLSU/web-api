@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     program.hasMany(models.programCourse);
     program.hasMany(models.programSopi);
     program.hasMany(models.myClass);
+    program.hasMany(models.assessment);
   };
   return program;
 };
