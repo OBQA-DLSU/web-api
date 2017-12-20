@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   assessment.associate = models => {
+    assessment.belongsTo(models.program);
     assessment.belongsTo(models.programSopi);
     assessment.belongsTo(models.programCourse);
     assessment.hasMany(models.myClassAssessment);

@@ -4,12 +4,12 @@ const invitationCodeService = require('../services/invitationCode.service');
 const secretKeys = require('../../secret-keys');
 const ErrorMessageService = require('../services/errorMessage.service');
 exports.invitation = async (req, res, next) => {
-  console.log(req.body);
+  const { invitationItems } = req.body;
   // this should be an array of invitations
   let error = [], success = [];
   // loop trough invitationData
   try {
-    const result = await Promise.all(req.body.map( async(data) => {
+    const result = await Promise.all(invitationItems.map( async(data) => {
       const errorMessage = 'There is an error occured while looping trough the array';
       const { email, programId, roleId, isAdmin, isStudent } = data;
       const invitationCode = await getCode(programId, roleId, isAdmin, isStudent);
