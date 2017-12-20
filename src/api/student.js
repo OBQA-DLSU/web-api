@@ -81,19 +81,11 @@ exports.getStudentById = async (req, res, next) => {
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
-  }
+  }g
 };
 
 exports.updateStudent = async (req, res, next) => {
   res.status(200).send({message: `This feature is not yet available.`});
-  // const { id } = req.params;
-  // let student, user;
-  // try {
-
-  // }
-  // catch (e) {
-
-  // }
 };
 
 exports.deleteStudent = async (req, res, next) => {
