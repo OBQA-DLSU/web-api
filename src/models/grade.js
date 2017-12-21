@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     grade.belongsTo(models.programCourse);
     grade.belongsTo(models.programSopi);
     grade.belongsTo(models.assessment);
+    grade.belongsTo(models.myClass);
   }
 
   return grade;

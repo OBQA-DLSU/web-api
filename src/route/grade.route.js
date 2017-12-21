@@ -1,6 +1,6 @@
 const express = require('express');
 const assessmentRouter = express.Router();
-const Assessment = require('../api/assessment');
+const Grade = require('../api/grade');
 const fs = require('fs');
 const multer = require('multer');
 const xlsxMiddleware = require('../middlewares/xlsx.middleware');
@@ -38,26 +38,25 @@ const uploadXlsx = multer({
 });
 
 assessmentRouter.route('/:id')
-.get(Assessment.getOneAssessment)
-.put(Assessment.updateAssessment)
-.delete(Assessment.deleteAssessment);
+.get(Grade.getOneGrade)
+.put(Grade.updateGrade)
+.delete(Grade.deleteGrade);
 
-assessmentRouter.route('/programAssessment/:programId')
-.get(Assessment.getProgramAssessments)
-.create(Assessment.createAssessment);
+assessmentRouter.route('/myClass/:myClassId')
+.get(Grade.getMyClassGrades)
+.put(Grade.updateMyClassGrades)
+.post(Grade.createMyClassGrades);
 
-assessmentRouter.route('/bulk/:programId')
-.post(uploadXlsx.single('assessment'), xlsxMiddleware.parseXLSX, Assessment.bulkCreateAssessment)
-.put(Assessment.bulkUpdateAssessment)
-.delete(Assessment.bulkDeleteAssessment);
+assessmentRouter.route('/bulk/:myClassId')
+.post(uploadXlsx.single('grade'), xlsxMiddleware.parseXLSX)
+.put()
+.delete();
 
-assessmentRouter.route('/filteredByProgramId/:programId/:filterName/:filterValue')
-.get(Assessment.getFilteredProgramAssessments);
 
 assessmentRouter.route('/all')
-.get(Assessment.getAllAssessments)
+.get()
 
 assessmentRouter.route('/:filterName/:filterValue')
-.get(Assessment.getFilteredAssessments)
+.get()
 
 module.exports = assessmentRouter;
