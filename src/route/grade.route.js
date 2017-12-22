@@ -48,15 +48,15 @@ assessmentRouter.route('/myClass/:myClassId')
 .post(Grade.createMyClassGrades);
 
 assessmentRouter.route('/bulk/:myClassId')
-.post(uploadXlsx.single('grade'), xlsxMiddleware.parseXLSX)
-.put()
-.delete();
+.post(uploadXlsx.single('grade'), xlsxMiddleware.parseXLSX, Grade.createBulkMyClassGrades)
+.put(uploadXlsx.single('grade'), xlsxMiddleware.parseXLSX, Grade.updateBulkMyClassGrades)
+.delete(Grade.deleteBulkMyClassGrades);
 
 
 assessmentRouter.route('/all')
-.get()
+.get(Grade.getAllGrades)
 
 assessmentRouter.route('/:filterName/:filterValue')
-.get()
+.get(Grade.getFilteredGrades)
 
 module.exports = assessmentRouter;

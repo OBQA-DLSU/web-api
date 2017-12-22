@@ -108,7 +108,6 @@ exports.createAssessment = async (req, res, next) => {
     term,
     academicYear,
     cycle,
-    programId,
     programSopiId,
     programCourseId
   } = req.body;
