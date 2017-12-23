@@ -6,9 +6,18 @@ exports.getOneMyClass = async (req, res, next) => {
   const { id } = req.params;
   let myClass;
   try {
-    myClass = await db.myClass.findOne({ where: {id}, include: [{all: true}]});
+    myClass = await db.myClass.findOne({
+      where: {id},
+      include: [
+        { model: db.program },
+        { model: db.programCourse, include: [ {model: db.course} ]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+      ]
+    });
     if (!myClass) { res.status(400).send(ErrorMessageService.clientError(`MyClass ID: ${id} is not existing.`)); return; }
-    res.status(200).send({myClass});
+    res.status(200).send(myClass);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -22,9 +31,10 @@ exports.updateMyClass = async (req, res, next) => {
   try {
     myClass = await updateMyClass(id, term, academicYear, cycle, programId, programCourseId);
     if (!myClass) { res.status(400).send(ErrorMessageService.clientError(`Invalid Input`)); return; }
-    res.status(200).send({myClass});
+    res.status(200).send(myClass);
   }
   catch (e) {
+    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
@@ -34,7 +44,12 @@ exports.deleteMyClass = async (req, res, next) => {
   let myClass;
   try {
     myClass = await deleteMyClass(id);
-    res.status(200).send({message: `Class ID: ${id} was successfully deleted.`});
+    if (myClass === 0) {
+      res.status(400).send(ErrorMessageService.clientError(`MyClass ID: ${id} is not existing.`));
+      return;
+    } else {
+      res.status(200).send({message: `Class ID: ${id} was successfully deleted.`});
+    }
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -46,9 +61,18 @@ exports.getMyClass = async (req, res, next) => {
   const { programId } = req.params;
   let myClasses;
   try {
-    myClasses = await db.myClass.findAll({where: {programId}, include: [{all: true}]});
-    if (!myClasses) { res.status(400).send(ErrorMessageService.clientError('Invalid Program ID.')); return; }
-    res.status(200).send({myClasses});
+    myClasses = await db.myClass.findAll({
+      where: { programId },
+      include: [
+        { model: db.program },
+        { model: db.programCourse, include: [ {model: db.course} ]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+      ]
+    });
+    if (myClasses.length === 0) { res.status(400).send(ErrorMessageService.clientError(`There is no classes yet for Program ID: ${programId}`)); return; }
+    res.status(200).send(myClasses);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -61,10 +85,11 @@ exports.createMyClass = async (req, res, next) => {
   let myClass;
   try {
     myClass = await createMyClass(term, academicYear, cycle, programId, programCourseId, instructorId);
-    if (myClass) { res.status(400).send(ErrorMessageService.clientError('Invalid Input.')); return; }
-    res.status(200).send({myClass});
+    if (!myClass) { res.status(400).send(ErrorMessageService.clientError('Invalid Input.')); return; }
+    res.status(200).send(myClass);
   }
   catch (e) {
+    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
@@ -76,7 +101,7 @@ exports.getMyClassPerProgramFiltered = async (req, res, next) => {
   try {
     myClasses = await getFilteredMyClassPerProgram(programId, filterName, filterValue);
     if (!myClasses) { res.status(400).send(ErrorMessageService.clientError(`Cannot find Classes for Program ID: ${programId}.`)); return; }
-    res.status(200).send({myClasses});
+    res.status(200).send(myClasses);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -90,7 +115,7 @@ exports.getMyClassFiltered = async (req, res, next) => {
   try {
     myClasses = await getFilteredMyClass(filterName, filterValue);
     if (!myClasses) { res.status(400).send('Cannot find classes on specified filters.'); return; }
-    res.status(200).send({myClasses});
+    res.status(200).send(myClasses);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -101,9 +126,16 @@ exports.getMyClassFiltered = async (req, res, next) => {
 exports.getAllMyClass = async (req, res, next) => {
   let myClasses;
   try {
-    myClasses = await db.myClass.findAll({include: [{all: true}]});
-    if (!myClasses) { res.status(400).send(ErrorMessageService.clientError('Cannot find Classes.')); return; }
-    res.status(200).send({myClasses});
+    myClasses = await db.myClass.findAll({
+      include: [
+        { model: db.program },
+        { model: db.programCourse, include: [ {model: db.course} ]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+      ]
+    });
+    res.status(200).send(myClasses);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -115,7 +147,7 @@ exports.bulkCreateMyClass = async (req, res, next) => {
   const { programId } = req.params;
   if (!req.payload) { res.status(400).send(ErrorMessageService.clientError('Invalid JSON data.')); return; }
   console.log(req.payload);
-  let jsonData, err = [], success =[];
+  let jsonData, error = [], success =[];
   try {
     jsonData = req.payload;
     if (!jsonData || jsonData.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Invalid JSON data`)); return; }
@@ -126,7 +158,7 @@ exports.bulkCreateMyClass = async (req, res, next) => {
         if (!course) { err.push(ErrorMessageService.clientError('Course not found.')); }
         programCourse = await db.programCourse.findOne({where: {programId, courseId: course.id}});
         if (!programCourse) { err.push(ErrorMessageService.clientError('ProgramCourse not found')); return; }
-        user = await db.user.findOne({where: {fname: data['FIRSTNAME OF INSTRUCTOR'], lname: data['LASTNAME OF INSTRUCTOR']}, include: [db.instructor], raw: true});
+        user = await db.user.findOne({where: {fname: data['FIRSTNAME OF INSTRUCTOR'], lname: data['LASTNAME OF INSTRUCTOR']}, include: [db.instructor]});
         console.log(user);
         if (!user) { err.push(ErrorMessageService.clientError(`User ${data['FIRSTNAME OF INSTRUCTOR']} not found`)); return; }
         instructor = await db.instructor.findOne({where: {userId: user.id}});
@@ -149,7 +181,7 @@ exports.bulkCreateMyClass = async (req, res, next) => {
         err.push(ErrorMessageService.serverError());
       }
     }));
-    res.status(200).send({err, success});
+    res.status(200).send({error, success});
   }
   catch (e) {
     console.log(e);
@@ -168,14 +200,32 @@ exports.bulkDeleteMyClass = (req, res, next) => {
 // functions
 const createMyClass = (term, academicYear, cycle, programId, programCourseId, instructorId) => {
   return new Promise((resolve, reject) => {
-    db.myClass.findOne({where: {term, academicYear, cycle, programId, programCourseId, instructorId}, include: [{all: true}]})
+    db.myClass.findOne({
+      where: {term, academicYear, cycle, programId, programCourseId, instructorId},
+      include: [
+        { model: db.program },
+        { model: db.programCourse, include: [ {model: db.course} ]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+      ]
+    })
     .then(result => {
       if (result) {
         resolve(result);
       } else {
         db.myClass.create({term, academicYear, cycle, programId, programCourseId, instructorId}, { individualHooks: true })
         .then(myClass => {
-          db.myClass.findOne({where: {id: myClass.id}, include: [{all: true}]})
+          db.myClass.findOne({
+            where: {id: myClass.id},
+            include: [
+              { model: db.program },
+              { model: db.programCourse, include: [ {model: db.course} ]},
+              { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+              { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
+              { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+            ]
+          })
           .then( data => {
             resolve(data);
           })
@@ -198,7 +248,16 @@ const updateMyClass = (id, term, academicYear, cycle, programId, programCourseId
   return new Promise((resolve, reject) => {
     db.myClass.update({term, academicYear, cycle, programId, programCourseId, instructorId}, {where:{id}, returning: true, individualHooks: true})
     .then(result => {
-      db.myClass.findOne({where: {id: result[0][1].id}, include: [{ all: true }]})
+      db.myClass.findOne({
+        where: {id: result[1][0].id},
+        include: [
+          { model: db.program },
+          { model: db.programCourse, include: [ {model: db.course} ]},
+          { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+          { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
+          { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+        ]
+      })
       .then(data => {
         resolve(data);
       })
@@ -214,7 +273,16 @@ const updateMyClass = (id, term, academicYear, cycle, programId, programCourseId
 
 const getOneMyClass = (id) => {
   return new Promise((resolve, reject) => {
-    db.myClass.findOne({where: {id}, include: [{all: true}]})
+    db.myClass.findOne({
+      where: {id},
+      include: [
+        { model: db.program },
+        { model: db.programCourse, include: [ {model: db.course} ]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+      ]
+    })
     .then(result => {
       resolve(result);
     })
@@ -228,14 +296,29 @@ const getFilteredMyClassPerProgram = (programId, filterName, filterValue) => {
   let filter;
   switch (filterName.toUpperCase()) {
     case 'TERM': filter = { term: filterValue, programId };
+      break;
     case 'ACADEMICYEAR': filter = { academicYear: filterValue, programId };
+      break;
     case 'PROGRAMCOURSEID': filter = { programCourseId: filterValue, programId };
+      break;
     case 'INSTRUCTORID': filter = { instructorId: filterValue, programId };
+      break;
     case 'CYCLE': filter = { cycle: filterValue, programId };
-    default: filter = { id: filterValue };
+      break;
+    default: filter = null;
   }
   return new Promise((resolve, reject) => {
-    db.myClass.findAll({where: filter, include: [{all: true}]})
+    if (!filter) { resolve([]) }
+    db.myClass.findAll({
+      where: filter,
+      include: [
+        { model: db.program },
+        { model: db.programCourse, include: [ {model: db.course} ]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+      ]
+    })
     .then(result => {
       resolve(result);
     })
@@ -249,16 +332,33 @@ const getFilteredMyClass = (filterName, filterValue) => {
   let filter;
   switch (filterName.toUpperCase()) {
     case 'ID': filter = { id: filterValue };
+      break;
     case 'TERM': filter = { term: filterValue };
+      break;
     case 'ACADEMICYEAR': filter = { academicYear: filterValue };
+      break;
     case 'PROGRAMID': filter = { programId: filterValue };
+      break;
     case 'PROGRAMCOURSEID': filter = { programCourseId: filterValue };
+      break;
     case 'INSTRUCTORID': filter = { instructorId: filterValue };
+      break;
     case 'CYCLE': filter = { cycle: filterValue };
-    default: filter = { id: filterValue };
+      break;
+    default: filter = null;
   }
   return new Promise((resolve, reject) => {
-    db.myClass.findAll({where: filter, include: [{all: true}]})
+    if (!filter) { resolve([]); }
+    db.myClass.findAll({
+      where: filter,
+      include: [
+        { model: db.program },
+        { model: db.programCourse, include: [ {model: db.course} ]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+      ]
+    })
     .then(result => {
       resolve(result);
     })
@@ -270,7 +370,7 @@ const getFilteredMyClass = (filterName, filterValue) => {
 
 const deleteMyClass = (id) => {
   return new Promise((resolve, reject) => {
-    db.myClass.destroy({where: {id}, individualHooks: true})
+    db.myClass.destroy({where: {id}, individualHooks: true, returning: true})
     .then(result => {
       resolve(result);
     })
