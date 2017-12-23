@@ -20,6 +20,11 @@ studentRouter.route('/program/:programId/')
 // .put()
 // .delete()
 
+studentRouter.route('/myClassStudent/:id')
+.get(Student.getOneMyClassStudent)
+.put(Student.updateMyClassStudent)
+.delete(Student.deleteMyClassStudent)
+
 studentRouter.route('/:id')
 .get(Student.getStudentById)
 .put(Student.updateStudent)

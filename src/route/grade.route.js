@@ -1,5 +1,5 @@
 const express = require('express');
-const assessmentRouter = express.Router();
+const gradeRouter = express.Router();
 const Grade = require('../api/grade');
 const fs = require('fs');
 const multer = require('multer');
@@ -37,26 +37,26 @@ const uploadXlsx = multer({
 	}
 });
 
-assessmentRouter.route('/:id')
+gradeRouter.route('/:id')
 .get(Grade.getOneGrade)
 .put(Grade.updateGrade)
 .delete(Grade.deleteGrade);
 
-assessmentRouter.route('/myClass/:myClassId')
+gradeRouter.route('/myClass/:myClassId')
 .get(Grade.getMyClassGrades)
 .put(Grade.updateMyClassGrades)
 .post(Grade.createMyClassGrades);
 
-assessmentRouter.route('/bulk/:myClassId')
+gradeRouter.route('/bulk/:myClassId')
 .post(uploadXlsx.single('grade'), xlsxMiddleware.parseXLSX, Grade.createBulkMyClassGrades)
 .put(uploadXlsx.single('grade'), xlsxMiddleware.parseXLSX, Grade.updateBulkMyClassGrades)
 .delete(Grade.deleteBulkMyClassGrades);
 
 
-assessmentRouter.route('/all')
+gradeRouter.route('/all')
 .get(Grade.getAllGrades)
 
-assessmentRouter.route('/:filterName/:filterValue')
+gradeRouter.route('/:filterName/:filterValue')
 .get(Grade.getFilteredGrades)
 
-module.exports = assessmentRouter;
+module.exports = gradeRouter;
