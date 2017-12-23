@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     programSopi.belongsTo(models.sopi);
     programSopi.hasMany(models.grade);
     programSopi.hasMany(models.assessment);
+    programSopi.hasMany(models.evidence);
   };
 
   return programSopi;

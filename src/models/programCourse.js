@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     programCourse.hasMany(models.grade);
     programCourse.hasMany(models.myClass);
     programCourse.hasMany(models.assessment);
+    programCourse.hasMany(models.evidence);
   };
 
   return programCourse;
