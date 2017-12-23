@@ -7,8 +7,8 @@ exports.getProgramSopi = async (req, res, next) => {
   let programSopi;
   try {
     programSopi = await db.programSopi.findAll({where: { programId }, include: [ {model: db.program}, {model: db.sopi, include: [db.so]} ]});
-    if (!programSopi || programSopi.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Program SOPIs with ID ${programId} are not existing.`)); return; }
-    res.status(200).send({programSopi});
+    if (!programSopi || programSopi.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Program SOPIs with Program ID ${programId} are not existing.`)); return; }
+    res.status(200).send(programSopi);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -17,12 +17,18 @@ exports.getProgramSopi = async (req, res, next) => {
 
 exports.createProgramSopi = async (req, res, next) => {
   const { programId } = req.params;
-  const { soId, code, description } = req.body;
-  let createSopiResponse, sopi, createProgramSopiResponse, programSopi, finalProgramSopi;
+  const { so, code, description } = req.body;
+  let createSopiResponse, sopi, createProgramSopiResponse, programSopi, finalProgramSopi, findSo, soResponse;
   try {
+    findSo = await db.so.findOne({ where: {code: so}});
+    if (!findSo) {
+      soResponse = await db.so.create({code: so});
+    } else {
+      soResponse = findSo;
+    }
     sopi = await db.sopi.findOne({where: {code}});
     if (!sopi) {
-      createSopiResponse = await sopiCreate(soId, code);
+      createSopiResponse = await sopiCreate(soResponse.id, code);
       if (!createSopiResponse) { res.status(400).send(ErrorMessageService.clientError(`Invalid Data input`)); return; }
     } else {
       createSopiResponse = sopi;
@@ -34,8 +40,8 @@ exports.createProgramSopi = async (req, res, next) => {
     } else {
       createProgramSopiResponse = programSopi;
     }
-    finalProgramSopi = await db.programSopi.findOne({ where: { id: programSopi.id }, include: [{model: db.program}, {model: db.sopi, include: [{model: db.so}]}]});
-    res.status(200).send({programSopi: finalProgramSopi});
+    finalProgramSopi = await db.programSopi.findOne({ where: { id: createProgramSopiResponse.id }, include: [{model: db.program}, {model: db.sopi, include: [{model: db.so}]}]});
+    res.status(200).send(finalProgramSopi);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -58,20 +64,25 @@ exports.getOneProgramSopi = async (req, res, next) => {
 
 exports.updateProgramSopi = async (req, res, next) => {
   const { id } = req.params;
-  const { soId, code, description } = req.body;
-  let updateSopiResponse, updateProgramSopiResponse, updatedProgramSopi;
+  const { so, code, description } = req.body;
+  let updateSopiResponse, updateProgramSopiResponse, updatedProgramSopi, findSo, soResponse;
   try {
-    so = await db.so.findOne({where: {code: so}});
+    findSo = await db.so.findOne({where: {code: so}});
+    if (!findSo) {
+      soResponse = await db.so.create({code: so});
+    } else {
+      soResponse = findSo;
+    }
     programSopi = await db.programSopi.findOne({where: {id}});
     if (!programSopi) { res.status(400).send(ErrorMessageService.clientError(`Program SOPI ID: ${id} not found.`)); return; }
     else {
-      updateSopiResponse = await sopiUpdate(programSopi.sopiId, soId, code);
+      updateSopiResponse = await sopiUpdate(programSopi.sopiId, soResponse.id, code);
       updateProgramSopiResponse = await programSopiUpdate(id, programSopi.programId, programSopi.sopiId, description);
     }
     if (!updateSopiResponse || !updateProgramSopiResponse) { res.status(400).send(ErrorMessageService.clientError(`Process Error.`)); return; }
     updatedProgramSopi = await db.programSopi.findOne({ where: { id }, include: [{model: db.program}, {model: db.sopi, include: [{model: db.so}]}]});
     if (!updatedProgramSopi) { res.status(400).send(ErrorMessageService.clientError(`Process Error.`)); return;}
-    res.status(200).send({programSopi: updatedProgramSopi});
+    res.status(200).send(updatedProgramSopi);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -82,8 +93,12 @@ exports.deleteProgramSopi = async (req, res, next) => {
   const { id } = req.params;
   let deletedProgramSopi;
   try {
-    deletedProgramSopi = await db.programSopi.destroy({ where: {id}, individualHooks: true });
-    res.status(200).send({message: `Program SOPI ID: ${id} was successfully deleted.`});
+    deletedProgramSopi = await db.programSopi.destroy({ where: {id}, individualHooks: true, returning: true});
+    if (deletedProgramSopi > 0) {
+      res.status(200).send({message: `Program SOPI ID: ${id} was successfully deleted.`});
+    } else {
+      res.status(400).send({message: `Program SOPI ID: ${id} is not existing.`})
+    }
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -130,7 +145,7 @@ exports.bulkCreateProgramSopi = async (req, res, next) => {
           createProgramSopiResponse = await programSopiUpdate(programSopi.id, programId, sopi.id, description);
           if (!createProgramSopiResponse) { err.push(ErrorMessageService.clientError(`Invalid Data Input`)); return; }
         }
-        finalData = await db.programSopi.findOne({ where: { id: programSopi.id }, include: [{model: db.program}, {model: db.sopi, include: [{model: db.so}]}]});
+        finalData = await db.programSopi.findOne({ where: { id: createProgramSopiResponse.id }, include: [{model: db.program}, {model: db.sopi, include: [{model: db.so}]}]});
         success.push(finalData);
       }
       catch (e) {
