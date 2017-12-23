@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     email: { type: DataTypes.STRING, allowNull: true, unique: true },
     fname: { type: DataTypes.STRING, allowNull: true },
     lname: { type: DataTypes.STRING, allowNull: true },
-    status: { type: DataTypes.STRING, defaultsTo: 'ACTIVE'},
+    status: { type: DataTypes.STRING, defaultValue: 'ACTIVE'},
     password: DataTypes.STRING
   });
 
