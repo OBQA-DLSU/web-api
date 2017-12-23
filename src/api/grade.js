@@ -26,8 +26,8 @@ exports.updateGrade = async (req, res, next) => {
     instructorId,
     programCourseId,
     programSopiId,
-    assessmentId,
-    myClassId
+    myClassId,
+    assessmentId
    } = req.body;
   let updatedGrade;
   try {
@@ -41,8 +41,8 @@ exports.updateGrade = async (req, res, next) => {
       instructorId,
       programCourseId,
       programSopiId,
-      assessmentId,
-      myClassId
+      myClassId,
+      assessmentId
     );
     if (!updatedGrade) { res.status(400).send(ErrorMessageService.clientError(`Was not able to update grade ID: ${id}`)); return; }
     res.status(200).send(updatedGrade);
@@ -111,34 +111,72 @@ exports.createMyClassGrades = async (req, res, next) => {
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
-// /bulk/:myClassId
 
+// /bulk/:myClassId
+exports.createBulkMyClassGrades = async (req, res, next) => {
+  const { myClassId } = req.params;
+  let myClassInputResult, createdGrades;
+  try {
+    jsonData = req.payload;
+    myClassInputResult = await gradeXlsxHeaderReaderHelper(myClassId, jsonData);
+    createdGrades = await createGradeArrayFunction(myClassId, myClassInputResult);
+    res.status(200).send(createdGrades);
+  }
+  catch (e) {
+    res.status(500).send(ErrorMessageService.serverError());
+  }
+};
+
+exports.updateBulkMyClassGrades = async (req, res, next) => {
+  const { myClassId } = req.params;
+  res.status(200).send({message: 'This feature is not yet available.'});
+};
+
+exports.deleteBulkMyClassGrades = async (req, res, next) => {
+  const { myClassId } = req.params;
+  res.status(200).send({message: 'This feature is not yet available.'});
+};
 
 // /all
-
+exports.getAllGrades = async (req, res, next) => {
+  let gradeData;
+  try {
+    gradeData = await db.grade.findAll({
+      include: [
+        { model: db.programSopi, include: [ {model: db.sopi}]},
+        { model: db.programCourse, include: [ {model: db.course} ]},
+        { model: db.student, include: [{ model: db.user, attributes: ['id', 'lname', 'fname', 'email'] }] },
+        { model: db.assessment, include: [{ all: true }]}
+      ]
+    });
+    res.status(200).send(gradeData);
+  }
+  catch (e) {
+    res.status(500).send(ErrorMessageService.serverError());
+  }
+};
 
 //  /:filterName/:filterValue
 
-
-
-// module.exports = (sequelize, DataTypes) => {
-//   const grade = sequelize.define('grade', {
-//     grade: { type: DataTypes.DOUBLE, allowNull: false, validate: { max: 1 } },
-//     term: { type: DataTypes.INTEGER, allowNull: false },
-//     cycle: { type: DataTypes.INTEGER, allowNull: false },
-//     academicYear: { type: DataTypes.STRING, allowNull: false, validate: { len: [9] } }
-//   });
-
-//   grade.associate = models => {
-//     grade.belongsTo(models.student);
-//     grade.belongsTo(models.instructor);
-//     grade.belongsTo(models.programCourse);
-//     grade.belongsTo(models.programSopi);
-//     grade.belongsTo(models.assessment);
-//   }
-
-//   return grade;
-// };
+exports.getFilteredGrades = async (req, res, next) => {
+  const { filterName, filterValue } = req.params;
+  const queryObject = gradeFilterHelper(filterName, filterValue);
+  let gradeData;
+  try {
+    gradeData = await db.grade.findAll({ where: queryObject,
+      include: [
+        { model: db.programSopi, include: [ {model: db.sopi}]},
+        { model: db.programCourse, include: [ {model: db.course} ]},
+        { model: db.student, include: [{ model: db.user, attributes: ['id', 'lname', 'fname', 'email'] }] },
+        { model: db.assessment, include: [{ all: true }]}
+      ]
+    });
+    res.status(200).send(gradeData);
+  }
+  catch (e) {
+    res.status(200).send(ErrorMessageService.serverError());
+  }
+};
 
 // functions
 const createGradeFunction = (
@@ -150,11 +188,9 @@ const createGradeFunction = (
   instructorId,
   programCourseId,
   programSopiId,
-  assessmentId,
-  myClassId
-) => {
+  myClassId,
+  assessmentId ) => {
   return new Promise(async(resolve, reject) => {
-    let newGrade;
     try {
       newGrade = await db.grade.create({
         grade,
@@ -165,8 +201,8 @@ const createGradeFunction = (
         instructorId,
         programCourseId,
         programSopiId,
-        assessmentId,
-        myClassId
+        myClassId,
+        assessmentId
       });
       resolve(newGrade);
     }
@@ -204,8 +240,8 @@ const createGradeArrayFunction = (myClassId, myClassGradeData) => {
               instructorId,
               programCourseId,
               programSopiId,
-              assessmentId,
-              myClassId
+              myClassId,
+              assessmentId
             );
             if (!newGrade) { error.push({ errorMessage: ErrorMessageService.clientError(`Was not able to add new Grade.`) }); return; }
             success.push(newGrade);
@@ -233,9 +269,8 @@ const updateGradeFunction = (
   instructorId,
   programCourseId,
   programSopiId,
-  assessmentId,
-  myClassId
-) => {
+  myClassId,
+  assessmentId ) => {
   return new Promise(async(resolve, reject) => {
     let updatedGrade;
     try {
@@ -248,8 +283,8 @@ const updateGradeFunction = (
         instructorId,
         programCourseId,
         programSopiId,
-        assessmentId,
-        myClassId
+        myClassId,
+        assessmentId
       }, { where: {id}, individualHooks: true, returning: true });
       
       resolve(updatedGrade[1][0]);
@@ -290,8 +325,8 @@ const updateMyClassGradesArrayFunction = (myClassId, myClassGradeData) => {
               instructorId,
               programCourseId,
               programSopiId,
-              assessmentId,
-              myClassId
+              myClassId,
+              assessmentId
             );
             if (!updatedGrade) { error.push({ errorMessage: ErrorMessageService.clientError(`Grade ID: ${id} was not updated.`) }); return; }
             success.push(updatedGrade);
@@ -308,3 +343,88 @@ const updateMyClassGradesArrayFunction = (myClassId, myClassGradeData) => {
     }
   });
 }
+
+const gradeXlsxHeaderReaderHelper = (myClassId, data) => {
+  return new Promise(async(resolve, reject) => {
+    let result = [], myClass, instructorId, programCourseId, assessmentId, assessments;
+    try {
+      // getting myClass Details
+      myClass = await db.myClass.findOne({ where: {id: myClassId},
+        include: [
+          { model: assessment, include: [
+            { model: programSopi , include: [
+              { model: sopi }
+            ]}
+          ]}
+        ]
+      });
+      assessments = myClass.assessment;
+      // loop tru each data.
+      const dataLoop = data.map( async(d) => {
+        let student, userFinder, user, studentFinder, myClassStudentFinder, myClassStudent;
+        try {
+          userFinder = await db.user.findOne({
+            where: { idNumber: d['ID NUMBER'] }
+          });
+          if (!userFinder) {
+            user = await db.user.create({idNumber: d['ID NUMBER'], lname: d['STUDENT LASTNAME'], fname: d['STUDENT FIRSTNAME']});
+            student = await db.student.create({userId: user.id, programId: myClass.programId});
+            myClassStudent = await db.myClassStudent.create({ studentId: student.id, myClassId: myClass.id });
+          } else {
+            user = userFinder;
+            studentFinder = await db.student.findOne({where: {userId: user.id, programId: myClass.programId}});
+            if (!studentFinder) {
+              student = await db.student.create({userId: user.id, programId: myClass.programId});
+              myClassStudent = await db.myClassStudent.create({ studentId: student.id, myClassId: myClass.id });
+            } else {
+              student = studentFinder;
+              myClassStudentFinder = await db.myClassStudent.findOne({where: {myClassId: myClass.id, studentId: student.id}});
+              if (!myClassStudentFinder) {
+                myClassStudent = await db.myClassStudent.create({ studentId: student.id, myClassId: myClass.id });
+              } else {
+                myClass = myClassStudentFinder;
+              }
+            }
+          }
+          // loop tru each assessments.
+          assessment.forEach((v, i, a) => {
+            let newObject = {
+              grade: d[v.programSopi.sopi.code],
+              term: v.term,
+              cycle: v.cycle,
+              academicYear: v.academicYear,
+              studentId: student.id,
+              instructorId: myClass.instructorId,
+              programCourseId: v.programCourseId,
+              programSopiId: v.programSopiId,
+              myClassId: myClass.id,
+              assessmentId: v.id
+            }
+            result.push(newObject);
+          });
+        }
+        catch (e) {
+          return;
+        }
+      })
+      resolve(result);
+    }
+    catch (e) {
+      reject(e);
+    }
+  });
+};
+
+const gradeFilterHelper = (filterName, filterValue) => {
+  switch (filterName.toUpperCase()) {
+    case 'TERM': return { term: filterValue };
+    case 'ASSESSMENTID': return { assessmentId: filterValue };
+    case 'CYCLE': return { cycle: filterValue };
+    case 'ACADEMICYEAR': return { academicYear: filterValue };
+    case 'STUDENTID': return { studentId: filterValue };
+    case 'PROGRAMCOURSEID': return { programCourseId: filterValue };
+    case 'PROGRAMSOPIID': return { programSopiId: filterValue };
+    case 'MYCLASSID': return { myClassId: filterValue };
+    default: return { '*': filterValue };
+  } 
+};
