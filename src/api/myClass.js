@@ -13,7 +13,7 @@ exports.getOneMyClass = async (req, res, next) => {
         { model: db.programCourse, include: [ {model: db.course} ]},
         { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
-        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
     });
     if (!myClass) { res.status(400).send(ErrorMessageService.clientError(`MyClass ID: ${id} is not existing.`)); return; }
@@ -68,7 +68,7 @@ exports.getMyClass = async (req, res, next) => {
         { model: db.programCourse, include: [ {model: db.course} ]},
         { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
-        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
     });
     if (myClasses.length === 0) { res.status(400).send(ErrorMessageService.clientError(`There is no classes yet for Program ID: ${programId}`)); return; }
@@ -132,7 +132,7 @@ exports.getAllMyClass = async (req, res, next) => {
         { model: db.programCourse, include: [ {model: db.course} ]},
         { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
-        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
     });
     res.status(200).send(myClasses);
@@ -207,7 +207,7 @@ const createMyClass = (term, academicYear, cycle, programId, programCourseId, in
         { model: db.programCourse, include: [ {model: db.course} ]},
         { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
-        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
     })
     .then(result => {
@@ -223,7 +223,7 @@ const createMyClass = (term, academicYear, cycle, programId, programCourseId, in
               { model: db.programCourse, include: [ {model: db.course} ]},
               { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
               { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
-              { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+              { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
             ]
           })
           .then( data => {
@@ -255,7 +255,7 @@ const updateMyClass = (id, term, academicYear, cycle, programId, programCourseId
           { model: db.programCourse, include: [ {model: db.course} ]},
           { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
           { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
-          { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+          { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
         ]
       })
       .then(data => {
@@ -280,7 +280,7 @@ const getOneMyClass = (id) => {
         { model: db.programCourse, include: [ {model: db.course} ]},
         { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
-        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
     })
     .then(result => {
@@ -316,7 +316,7 @@ const getFilteredMyClassPerProgram = (programId, filterName, filterValue) => {
         { model: db.programCourse, include: [ {model: db.course} ]},
         { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
-        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
     })
     .then(result => {
@@ -356,7 +356,7 @@ const getFilteredMyClass = (filterName, filterValue) => {
         { model: db.programCourse, include: [ {model: db.course} ]},
         { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
-        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'email', 'fname', 'lname']}] } ] }
+        { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
     })
     .then(result => {
