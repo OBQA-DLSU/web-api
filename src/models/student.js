@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const student = sequelize.define('student', {
-    isAdmin: { type: DataTypes.BOOLEAN, defaultsTo: false },
+    isAdmin: { type: DataTypes.BOOLEAN, defaultValue: false },
     status: { type: DataTypes.STRING, allowNull: true }
   });
   student.associate = models => {

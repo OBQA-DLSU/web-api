@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const programCourse = sequelize.define('programCourse', {
-    toBeAssessed: { type: DataTypes.BOOLEAN, defaultsTo: false },
+    toBeAssessed: { type: DataTypes.BOOLEAN, defaultValue: false },
     description: { type: DataTypes.STRING, allowNull: true }
   });
 
