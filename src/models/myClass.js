@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     myClass.hasMany(models.myClassStudent);
     myClass.hasMany(models.myClassAssessment);
     myClass.hasMany(models.grade);
+    myClass.hasMany(models.evidence);
   };
 
   return myClass;
