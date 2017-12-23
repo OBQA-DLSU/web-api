@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     assessment.belongsTo(models.programCourse);
     assessment.hasMany(models.myClassAssessment);
     assessment.hasMany(models.grade);
+    assessment.hasMany(models.evidence);
   };
 
   return assessment;
