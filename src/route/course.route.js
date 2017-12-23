@@ -37,6 +37,9 @@ const uploadXlsx = multer({
 	}
 });
 
+courseRouter.route('/:programId')
+	.get(Course.getCourse);
+
 courseRouter.route('/programCourse/:id')
 	.get(Course.getOneCourse)
 	.put(Course.updateCourse)
@@ -47,10 +50,8 @@ courseRouter.route('/bulk/:programId')
 	.put(Course.bulkUpdateCourse)
 	.delete(Course.bulkDeleteCourse);
 
-courseRouter.route('/:programId')
-	.get(Course.getCourse);
-
 courseRouter.route('/:programId/:toBeAssessed')
+	.get(Course.getToBeAssessedCourse)
 	.post(Course.addCourse);
 
 module.exports = courseRouter;
