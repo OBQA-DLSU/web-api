@@ -6,7 +6,17 @@ exports.getOneGrade = async (req, res, next) => {
   const { id } = req.params;
   let gradeData;
   try {
-    gradeData = await db.grade.findOne({ where: {id}, include: [{ all: true }] });
+    gradeData = await db.grade.findOne({
+      where: {id},
+      include: [
+        { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+        { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+        { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
+        { model: db.programCourse, includ: [{ model: db.course }] },
+        { model: db.assessment },
+        { model: db.myClass }
+      ]
+    });
     if (!gradeData) { res.status(400).send(ErrorMessageService.clientError(`Data for grade ID: ${id} was not found.`)); return; }
     res.status(200).send(gradeData);
   }
@@ -57,7 +67,8 @@ exports.deleteGrade = async (req, res, next) => {
   let deletedGrade;
   try {
     deletedGrade = await db.grade.destroy({ where: {id}, individualHooks: true, returning: true });
-    res.status(200).send(deletedGrade);
+    if (deletedGrade === 0) { res.status(400).send(ErrorMessageService.clientError(`Grade with ID: ${id} does not exist.`)); return; }
+    res.status(200).send({message: `Grade ID: ${id} was successfully deleted.`});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -72,10 +83,12 @@ exports.getMyClassGrades = async (req, res, next) => {
     gradeData = await db.grade.findAll({ 
       where: {myClassId},
       include: [
-        { model: db.programSopi, include: [ {model: db.sopi}]},
-        { model: db.programCourse, include: [ {model: db.course} ]},
-        { model: db.student, include: [{ model: db.user, attributes: ['id', 'lname', 'fname', 'email'] }] },
-        { model: db.assessment, include: [{ all: true }]}
+        { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+        { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+        { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
+        { model: db.programCourse, includ: [{ model: db.course }] },
+        { model: db.assessment },
+        { model: db.myClass }
       ]
     });
     res.status(200).send(gradeData);
@@ -103,11 +116,13 @@ exports.createMyClassGrades = async (req, res, next) => {
   const { myClassId } = req.params;
   const { myClassGradeData } = req.body; // this must be an array of gradeData.
   let myClassInputResult;
+  if ( !myClassGradeData || myClassGradeData.length === 0) { res.status(400).send(ErrorMessageService.clientError(`Invalid myClass Data.`)); return; }
   try {
     myClassInputResult = await createGradeArrayFunction(myClassId, myClassGradeData);
     res.status(200).send(myClassInputResult);
   }
   catch (e) {
+    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
@@ -115,16 +130,19 @@ exports.createMyClassGrades = async (req, res, next) => {
 // /bulk/:myClassId
 exports.createBulkMyClassGrades = async (req, res, next) => {
   const { myClassId } = req.params;
-  let myClassInputResult, createdGrades;
-  try {
-    jsonData = req.payload;
-    myClassInputResult = await gradeXlsxHeaderReaderHelper(myClassId, jsonData);
-    createdGrades = await createGradeArrayFunction(myClassId, myClassInputResult);
-    res.status(200).send(createdGrades);
-  }
-  catch (e) {
-    res.status(500).send(ErrorMessageService.serverError());
-  }
+  // this feature needs more testing.
+  // let myClassInputResult, createdGrades;
+  // try {
+  //   jsonData = req.payload;
+  //   myClassInputResult = await gradeXlsxHeaderReaderHelper(myClassId, jsonData);
+  //   createdGrades = await createGradeArrayFunction(myClassId, myClassInputResult);
+  //   res.status(200).send(createdGrades);
+  // }
+  // catch (e) {
+  //   console.log(e);
+  //   res.status(500).send(ErrorMessageService.serverError());
+  // }
+  res.status(200).send({message: 'This feature is not yet available.'});
 };
 
 exports.updateBulkMyClassGrades = async (req, res, next) => {
@@ -143,10 +161,12 @@ exports.getAllGrades = async (req, res, next) => {
   try {
     gradeData = await db.grade.findAll({
       include: [
-        { model: db.programSopi, include: [ {model: db.sopi}]},
-        { model: db.programCourse, include: [ {model: db.course} ]},
-        { model: db.student, include: [{ model: db.user, attributes: ['id', 'lname', 'fname', 'email'] }] },
-        { model: db.assessment, include: [{ all: true }]}
+        { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+        { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+        { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
+        { model: db.programCourse, includ: [{ model: db.course }] },
+        { model: db.assessment },
+        { model: db.myClass }
       ]
     });
     res.status(200).send(gradeData);
@@ -165,10 +185,12 @@ exports.getFilteredGrades = async (req, res, next) => {
   try {
     gradeData = await db.grade.findAll({ where: queryObject,
       include: [
-        { model: db.programSopi, include: [ {model: db.sopi}]},
-        { model: db.programCourse, include: [ {model: db.course} ]},
-        { model: db.student, include: [{ model: db.user, attributes: ['id', 'lname', 'fname', 'email'] }] },
-        { model: db.assessment, include: [{ all: true }]}
+        { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+        { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+        { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
+        { model: db.programCourse, includ: [{ model: db.course }] },
+        { model: db.assessment },
+        { model: db.myClass }
       ]
     });
     res.status(200).send(gradeData);
@@ -191,20 +213,37 @@ const createGradeFunction = (
   myClassId,
   assessmentId ) => {
   return new Promise(async(resolve, reject) => {
+    let newGrade, checkGrade;
     try {
-      newGrade = await db.grade.create({
-        grade,
-        term,
-        cycle,
-        academicYear,
-        studentId,
-        instructorId,
-        programCourseId,
-        programSopiId,
-        myClassId,
-        assessmentId
-      });
-      resolve(newGrade);
+      checkGrade = await db.grade.findOne({ where: {term, cycle, academicYear, studentId, instructorId, programCourseId, programSopiId, assessmentId} });
+      if (!checkGrade) {
+        newGrade = await db.grade.create({
+          grade,
+          term,
+          cycle,
+          academicYear,
+          studentId,
+          instructorId,
+          programCourseId,
+          programSopiId,
+          myClassId,
+          assessmentId
+        });
+      } else {
+        newGrade = checkGrade;
+      }
+      const gradeData = await db.grade.findOne({
+        where: {id: newGrade.id},
+        include: [
+          { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+          { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+          { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
+          { model: db.programCourse, includ: [{ model: db.course }] },
+          { model: db.assessment },
+          { model: db.myClass }
+        ]
+      })
+      resolve(gradeData);
     }
     catch (e) {
       reject(e);
@@ -213,10 +252,10 @@ const createGradeFunction = (
 };
 
 const createGradeArrayFunction = (myClassId, myClassGradeData) => {
-  return new Promise(async(req, res) => {
+  return new Promise(async(resolve, reject ) => {
     let success = [], error = [];
     try {
-      const myClassGradeData = await myClassGradeData.map(
+      const result = await Promise.all( myClassGradeData.map(
         async (myClassGrade) => {
           let newGrade;
           const {
@@ -247,10 +286,10 @@ const createGradeArrayFunction = (myClassId, myClassGradeData) => {
             success.push(newGrade);
           }
           catch (e) {
-            error.push({errorMessage: ErrorMessageService.serverError()});
+            error.push({errorMessage: ErrorMessageService.clientError(e)});
           }
         }
-      );
+      ));
       resolve({ success, error });
     }
    catch (e) {
@@ -286,8 +325,19 @@ const updateGradeFunction = (
         myClassId,
         assessmentId
       }, { where: {id}, individualHooks: true, returning: true });
-      
-      resolve(updatedGrade[1][0]);
+      if (!updatedGrade[1][0]) { reject(ErrorMessageService.clientError(`Grade was not updated.`))}
+      const gradeData = await db.grade.findOne({
+        where: {id: updatedGrade[1][0].id},
+        include: [
+          { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+          { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
+          { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
+          { model: db.programCourse, includ: [{ model: db.course }] },
+          { model: db.assessment },
+          { model: db.myClass }
+        ]
+      });
+      resolve(gradeData);
     }
     catch (e) {
       reject(e);
@@ -299,7 +349,7 @@ const updateMyClassGradesArrayFunction = (myClassId, myClassGradeData) => {
   return new Promise(async(resolve, reject) => {
     let success = [], error = [];
     try {
-      const myClassGradeDataProcess = await myClassGradeData.map(
+      const myClassGradeDataProcess = await Promise.all( myClassGradeData.map(
         async (myClassGrade) => {
           let updatedGrade;
           const {
@@ -335,7 +385,7 @@ const updateMyClassGradesArrayFunction = (myClassId, myClassGradeData) => {
             error.push({ errorMessage: ErrorMessageService.serverError() });
           }
         }
-      );
+      ));
       resolve({ success, error });
     }
     catch (e) {
@@ -351,16 +401,18 @@ const gradeXlsxHeaderReaderHelper = (myClassId, data) => {
       // getting myClass Details
       myClass = await db.myClass.findOne({ where: {id: myClassId},
         include: [
-          { model: assessment, include: [
-            { model: programSopi , include: [
-              { model: sopi }
-            ]}
-          ]}
+          { model: db.myClassAssessment, include: [
+            { model: db.assessment, include: [
+              { model: db.programSopi, include: [
+                { model: db.sopi }
+              ] }
+            ] }
+          ] }
         ]
       });
-      assessments = myClass.assessment;
+      assessments = myClass.myClassAssessments;
       // loop tru each data.
-      const dataLoop = data.map( async(d) => {
+      const dataLoop = Promise.all( data.map( async(d) => {
         let student, userFinder, user, studentFinder, myClassStudentFinder, myClassStudent;
         try {
           userFinder = await db.user.findOne({
@@ -382,23 +434,23 @@ const gradeXlsxHeaderReaderHelper = (myClassId, data) => {
               if (!myClassStudentFinder) {
                 myClassStudent = await db.myClassStudent.create({ studentId: student.id, myClassId: myClass.id });
               } else {
-                myClass = myClassStudentFinder;
+                myClassStudent = myClassStudentFinder;
               }
             }
           }
           // loop tru each assessments.
-          assessment.forEach((v, i, a) => {
+          assessments.forEach((v, i, a) => {
             let newObject = {
-              grade: d[v.programSopi.sopi.code],
-              term: v.term,
-              cycle: v.cycle,
-              academicYear: v.academicYear,
+              grade: d[v.assessment.programSopi.sopi.code],
+              term: v.assessment.term,
+              cycle: v.assessment.cycle,
+              academicYear: v.assessment.academicYear,
               studentId: student.id,
               instructorId: myClass.instructorId,
-              programCourseId: v.programCourseId,
-              programSopiId: v.programSopiId,
+              programCourseId: v.assessment.programCourseId,
+              programSopiId: v.assessment.programSopiId,
               myClassId: myClass.id,
-              assessmentId: v.id
+              assessmentId: v.assessment.id
             }
             result.push(newObject);
           });
@@ -406,7 +458,7 @@ const gradeXlsxHeaderReaderHelper = (myClassId, data) => {
         catch (e) {
           return;
         }
-      })
+      }));
       resolve(result);
     }
     catch (e) {
@@ -425,6 +477,6 @@ const gradeFilterHelper = (filterName, filterValue) => {
     case 'PROGRAMCOURSEID': return { programCourseId: filterValue };
     case 'PROGRAMSOPIID': return { programSopiId: filterValue };
     case 'MYCLASSID': return { myClassId: filterValue };
-    default: return { '*': filterValue };
+    default: return null;
   } 
 };
