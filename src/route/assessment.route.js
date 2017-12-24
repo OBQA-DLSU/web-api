@@ -37,11 +37,6 @@ const uploadXlsx = multer({
 	}
 });
 
-assessmentRouter.route('/:id')
-.get(Assessment.getOneAssessment)
-.put(Assessment.updateAssessment)
-.delete(Assessment.deleteAssessment);
-
 assessmentRouter.route('/programAssessment/:programId')
 .get(Assessment.getProgramAssessments)
 .post(Assessment.createAssessment);
@@ -59,5 +54,10 @@ assessmentRouter.route('/all')
 
 assessmentRouter.route('/:filterName/:filterValue')
 .get(Assessment.getFilteredAssessments)
+
+assessmentRouter.route('/:id')
+.get(Assessment.getOneAssessment)
+.put(Assessment.updateAssessment)
+.delete(Assessment.deleteAssessment);
 
 module.exports = assessmentRouter;
