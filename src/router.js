@@ -16,7 +16,7 @@ module.exports = (app) => {
   app.use('/api/myClass', myClassRouter);
   app.use('/api/student', studentRouter);
   app.use('/api/assessment', assessmentRouter);
-  app.use('/api/grades', gradeRouter);
+  app.use('/api/grade', gradeRouter);
 };
 
 
