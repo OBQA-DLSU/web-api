@@ -24,8 +24,6 @@ app.use(function(req, res, next) {
 // app.use(bodyParser.text());
 // app.use(bodyParser.json({type:"application/vmd.api+json"}));
 
-
-
 apiRoutes(app);
 
 db.sequelize.sync()
