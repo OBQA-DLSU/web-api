@@ -37,11 +37,6 @@ const uploadXlsx = multer({
 	}
 });
 
-gradeRouter.route('/:id')
-.get(Grade.getOneGrade)
-.put(Grade.updateGrade)
-.delete(Grade.deleteGrade);
-
 gradeRouter.route('/myClass/:myClassId')
 .get(Grade.getMyClassGrades)
 .put(Grade.updateMyClassGrades)
@@ -58,5 +53,11 @@ gradeRouter.route('/all')
 
 gradeRouter.route('/:filterName/:filterValue')
 .get(Grade.getFilteredGrades)
+
+
+gradeRouter.route('/:id')
+.get(Grade.getOneGrade)
+.put(Grade.updateGrade)
+.delete(Grade.deleteGrade);
 
 module.exports = gradeRouter;
