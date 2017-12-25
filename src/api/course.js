@@ -90,7 +90,12 @@ exports.updateCourse = async (req, res, next) => {
       updateProgramCourseResponse = await programCourseUpdate(id, programCourse.programId, programCourse.courseId, (JSON.parse(toBeAssessed) === true) ? true : false, description);
     }
     if (!updateCourseResponse || !updateProgramCourseResponse) { res.status(400).send(ErrorMessageService.clientError(`Proccess Error.`)); return; }
-    updatedProgramCourse = await db.programCourse.find({where: {id}, include: [{model: db.course}]});
+    updatedProgramCourse = await db.programCourse.find({
+      where: {id}, include: [
+        {model: db.course},
+        {model: db.program}
+      ]
+    });
     if (!updatedProgramCourse) { res.status(400).send(ErrorMessageService.clientError(`Proccess Error.`)); return; }
     res.status(200).send(updatedProgramCourse);
   }
