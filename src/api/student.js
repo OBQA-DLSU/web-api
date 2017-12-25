@@ -157,7 +157,7 @@ exports.deleteStudent = async (req, res, next) => {
     if (student === 0) {
       res.status(400).send(ErrorMessageService.clientError(`Student ID: ${id} is not existing.`));
     } else {
-      res.status(200).send({ message: `Student ID: ${id} was successfully deleted.`});
+      res.status(200).send({id:id});
     }
   }
   catch (e) {
@@ -227,7 +227,7 @@ exports.deleteMyClassStudent = async (req, res, next) => {
       res.status(400).send(ErrorMessageService.clientError(`MyClassStudent ID: ${id} is not existing.`));
       return;
     }
-    res.status(200).send({message: `MyClassStudent ID: ${id} was successfully deleted.`});
+    res.status(200).send({id:id});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());

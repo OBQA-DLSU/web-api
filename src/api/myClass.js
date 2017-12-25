@@ -48,7 +48,7 @@ exports.deleteMyClass = async (req, res, next) => {
       res.status(400).send(ErrorMessageService.clientError(`MyClass ID: ${id} is not existing.`));
       return;
     } else {
-      res.status(200).send({message: `Class ID: ${id} was successfully deleted.`});
+      res.status(200).send({id:id});
     }
   }
   catch (e) {

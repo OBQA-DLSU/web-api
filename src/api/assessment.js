@@ -89,7 +89,7 @@ exports.deleteAssessment = async (req, res, next) => {
   try {
     deletedAssessment = await db.assessment.destroy({where: {id}, individualHooks: true, returning: true });
     if (deletedAssessment === 0) { res.status(400).send(ErrorMessageService.clientError(`Assessment with ID: ${id} does not exists.`)); return; }
-    res.status(200).send({ message: `Assessment with ID: ${id} was successfully deleted.`} );
+    res.status(200).send({id:id} );
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
