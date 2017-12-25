@@ -111,7 +111,7 @@ exports.deleteCourse = async (req, res, next) => {
   try {
     deleteProgramCourseResponse = await db.programCourse.destroy({where: {id}, individualHooks: true});
     if(deleteProgramCourseResponse > 0) {
-      res.status(200).send({message: `Course with program Course ID: ${id} has successfully deleted.`});
+      res.status(200).send({id:id});
     } else {
       res.status(400).send(ErrorMessageService.clientError(`Program Course ID: ${id} can't be find.`));
     }

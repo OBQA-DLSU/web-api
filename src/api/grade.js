@@ -68,7 +68,7 @@ exports.deleteGrade = async (req, res, next) => {
   try {
     deletedGrade = await db.grade.destroy({ where: {id}, individualHooks: true, returning: true });
     if (deletedGrade === 0) { res.status(400).send(ErrorMessageService.clientError(`Grade with ID: ${id} does not exist.`)); return; }
-    res.status(200).send({message: `Grade ID: ${id} was successfully deleted.`});
+    res.status(200).send({id:id});
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());

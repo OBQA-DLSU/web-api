@@ -95,7 +95,7 @@ exports.deleteProgramSopi = async (req, res, next) => {
   try {
     deletedProgramSopi = await db.programSopi.destroy({ where: {id}, individualHooks: true, returning: true});
     if (deletedProgramSopi > 0) {
-      res.status(200).send({message: `Program SOPI ID: ${id} was successfully deleted.`});
+      res.status(200).send({id:id});
     } else {
       res.status(400).send({message: `Program SOPI ID: ${id} is not existing.`})
     }
