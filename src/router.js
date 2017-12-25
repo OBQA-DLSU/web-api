@@ -6,6 +6,7 @@ const myClassRouter = require('./route/myClass.route');
 const studentRouter = require('./route/student.route');
 const assessmentRouter = require('./route/assessment.route');
 const gradeRouter = require('./route/grade.route');
+const instructorRouter = require('./route/instructor.route');
 
 module.exports = (app) => {
   app.get('/', welcomePage);
@@ -17,6 +18,7 @@ module.exports = (app) => {
   app.use('/api/student', studentRouter);
   app.use('/api/assessment', assessmentRouter);
   app.use('/api/grade', gradeRouter);
+  app.use('/api/instructor', instructorRouter);
 };
 
 
