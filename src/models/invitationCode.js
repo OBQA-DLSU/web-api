@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt-nodejs');
 const CodeGenerator = require('node-code-generator');
 const generator = new CodeGenerator();
 const pattern = '*********';

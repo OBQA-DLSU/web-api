@@ -22,11 +22,5 @@ module.exports = (sequelize, DataTypes) => {
       user.password = bcrypt.hashSync(user.password, salt);
     }
   });
-  user.beforeUpdate(user => {
-    if (user.email && user.password) {
-      const salt = bcrypt.genSaltSync(10);
-      user.password = bcrypt.hashSync(user.password, salt);
-    }
-  });
   return user;
 };
