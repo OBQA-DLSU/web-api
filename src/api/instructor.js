@@ -41,7 +41,7 @@ exports.getInstructorByProgram = async (req, res, next) => {
 exports.createInstructor = async (req, res, next) => {
   const { programId } = req.params;
   const { idNumber, email, lname, fname } = req.body;
-  let checkUser, user, checkInstructor, instructor;
+  let checkUser, user, checkInstructor, instructor, populatedInstructor;
   try {
     checkUser = await db.user.findOne({ where: {idNumber} });
     if (!checkUser) {
@@ -56,7 +56,14 @@ exports.createInstructor = async (req, res, next) => {
       instructor = checkInstructor;
     }
     if (!instructor) { res.status(400).send(ErrorMessageService.clientError(`Instructor awas not created.`)); return; }
-    res.status(200).send(instructor);
+    populatedInstructor = await db.instructor.findOne({
+      where: {id: instructor.id},
+      include: [
+        { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname'] },
+        { model: db.program }
+      ]
+    });
+    res.status(200).send(populatedInstructor);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -88,7 +95,7 @@ exports.updateInstructor = async (req, res, next) => {
   const { idNumber, email, lname, fname, isAdmin } = req.body;
   let checkUser, updatedUser, checkInstructor, updatedInstructor, instructor;
   try {
-    checkInstructor = await db.instructor.findOne({ where: id });
+    checkInstructor = await db.instructor.findOne({ where: {id} });
     if (!checkInstructor) { res.status(400).send(ErrorMessageService.clientError(`Instructor ID: ${id} does not exist.`)); return; }
     checkUser = await db.user.find({ where: {id: checkInstructor.userId}});
     if (!checkUser) { res.status(400).send(ErrorMessageService.clientError(`User ID: ${checkUser.userId} does not exist.`)); return; }
