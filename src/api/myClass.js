@@ -11,7 +11,7 @@ exports.getOneMyClass = async (req, res, next) => {
       include: [
         { model: db.program },
         { model: db.programCourse, include: [ {model: db.course} ]},
-        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
         { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
@@ -66,7 +66,7 @@ exports.getMyClass = async (req, res, next) => {
       include: [
         { model: db.program },
         { model: db.programCourse, include: [ {model: db.course} ]},
-        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
         { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
@@ -89,7 +89,6 @@ exports.createMyClass = async (req, res, next) => {
     res.status(200).send(myClass);
   }
   catch (e) {
-    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
@@ -130,7 +129,7 @@ exports.getAllMyClass = async (req, res, next) => {
       include: [
         { model: db.program },
         { model: db.programCourse, include: [ {model: db.course} ]},
-        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
         { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
@@ -205,7 +204,7 @@ const createMyClass = (term, academicYear, cycle, programId, programCourseId, in
       include: [
         { model: db.program },
         { model: db.programCourse, include: [ {model: db.course} ]},
-        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
         { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
@@ -221,7 +220,7 @@ const createMyClass = (term, academicYear, cycle, programId, programCourseId, in
             include: [
               { model: db.program },
               { model: db.programCourse, include: [ {model: db.course} ]},
-              { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+              { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname']}]},
               { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
               { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
             ]
@@ -253,7 +252,7 @@ const updateMyClass = (id, term, academicYear, cycle, programId, programCourseId
         include: [
           { model: db.program },
           { model: db.programCourse, include: [ {model: db.course} ]},
-          { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+          { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname']}]},
           { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
           { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
         ]
@@ -278,7 +277,7 @@ const getOneMyClass = (id) => {
       include: [
         { model: db.program },
         { model: db.programCourse, include: [ {model: db.course} ]},
-        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
         { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
@@ -314,7 +313,7 @@ const getFilteredMyClassPerProgram = (programId, filterName, filterValue) => {
       include: [
         { model: db.program },
         { model: db.programCourse, include: [ {model: db.course} ]},
-        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
         { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
@@ -354,7 +353,7 @@ const getFilteredMyClass = (filterName, filterValue) => {
       include: [
         { model: db.program },
         { model: db.programCourse, include: [ {model: db.course} ]},
-        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'email', 'lname', 'fname']}]},
+        { model: db.instructor, include: [ { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname']}]},
         { model: db.myClassAssessment, include: [ { model: db.assessment } ] },
         { model: db.myClassStudent, include: [ { model: db.student, include: [{model: db.user, attributes: ['id', 'idNumber', 'email', 'fname', 'lname']}] } ] }
       ]
