@@ -11,7 +11,8 @@ exports.getAllAssessments = async (req, res, next) => {
       include: [
         { model: db.program },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
-        { model: db.programCourse, include: [{ model: db.course }] }
+        { model: db.programCourse, include: [{ model: db.course }] },
+        { model: db.improvementPlanSuggestion }
       ]
     });
     res.status(200).send(assessments);
@@ -31,7 +32,8 @@ exports.getOneAssessment = async (req, res, next) => {
       include: [
         { model: db.program },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
-        { model: db.programCourse, include: [{ model: db.course }] }
+        { model: db.programCourse, include: [{ model: db.course }] },
+        { model: db.improvementPlanSuggestion }
       ]
     });
     if (!assessment) { res.status(400).send(ErrorMessageService.clientError(`Assessment ID: ${id} is not existing.`)); return; }
@@ -107,7 +109,8 @@ exports.getProgramAssessments = async (req, res, next) => {
       include: [
         { model: db.program },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
-        { model: db.programCourse, include: [{ model: db.course }] }
+        { model: db.programCourse, include: [{ model: db.course }] },
+        { model: db.improvementPlanSuggestion }
       ]
     });
     res.status(200).send(assessments);
@@ -273,7 +276,8 @@ const createAssessmentFunction = (
         include: [
           { model: db.program },
           { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
-          { model: db.programCourse, include: [{ model: db.course }] }
+          { model: db.programCourse, include: [{ model: db.course }] },
+          { model: db.improvementPlanSuggestion }
         ]
       });
       if (!checkAssessment) {
@@ -297,7 +301,8 @@ const createAssessmentFunction = (
           include: [
             { model: db.program },
             { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
-            { model: db.programCourse, include: [{ model: db.course }] }
+            { model: db.programCourse, include: [{ model: db.course }] },
+            { model: db.improvementPlanSuggestion }
           ]
         });
       } else {
@@ -349,7 +354,8 @@ const updateAssessmentFunction = (
         include: [
           { model: db.program },
           { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
-          { model: db.programCourse, include: [{ model: db.course }] }
+          { model: db.programCourse, include: [{ model: db.course }] },
+          { model: db.improvementPlanSuggestion }
         ]
       });
       resolve(populatedAssessment);
@@ -397,7 +403,8 @@ const getFilteredProgramAssessmentsFunction = (programId, filterName, filterValu
       include: [
         { model: db.program },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
-        { model: db.programCourse, include: [{ model: db.course }] }
+        { model: db.programCourse, include: [{ model: db.course }] },
+        { model: db.improvementPlanSuggestion }
       ]
     });
       resolve(assessments);
@@ -420,7 +427,8 @@ const getFilteredAssessmentsFunction = (filterName, filterValue) => {
       include: [
         { model: db.program },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
-        { model: db.programCourse, include: [{ model: db.course }] }
+        { model: db.programCourse, include: [{ model: db.course }] },
+        { model: db.improvementPlanSuggestion }
       ]
     });
       resolve(assessments);
@@ -463,4 +471,3 @@ const assessmentInputConverter = (programId, data) => {
     }
   });
 };
-
