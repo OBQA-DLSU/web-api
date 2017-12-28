@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     assessment.hasMany(models.myClassAssessment);
     assessment.hasMany(models.grade);
     assessment.hasMany(models.evidence);
+    assessment.hasMany(models.improvementPlanSuggestion);
   };
 
   return assessment;
