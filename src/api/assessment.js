@@ -109,9 +109,9 @@ exports.getProgramAssessments = async (req, res, next) => {
       include: [
         { model: db.program },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
-        { model: db.programCourse, include: [{ model: db.course }] },
-        { model: db.improvementPlanSuggestion }
-      ]
+        { model: db.programCourse, include: [{ model: db.course }] }
+      ],
+      raw: true
     });
     res.status(200).send(assessments);
   }
