@@ -75,7 +75,9 @@ exports.createMyClassStudent = async (req, res, next) => {
       include: [
         { model: db.student, include: [
           { model: db.user, attributes: ['idNumber', 'lname', 'fname', 'id', 'email'] }] }
-        ]});
+        ],
+        raw: true
+      });
     res.status(200).send(enrolledStudent);
   }
   catch (e) {
@@ -179,7 +181,8 @@ exports.getOneMyClassStudent = async (req, res, next) => {
           { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname'] },
           { model: db.program }
         ] }
-      ]
+      ],
+      raw: true
     });
     if (!myClassStudent) { res.status(400).send(ErrorMessageService.clientError(`MyClassStudent ID: ${id} does not exists.`)); return; }
     res.status(200).send(myClassStudent);
@@ -211,7 +214,8 @@ exports.updateMyClassStudent = async (req, res, next) => {
           { model: db.user, attributes: ['id', 'idNumber', 'email', 'lname', 'fname'] },
           { model: db.program }
         ] }
-      ]
+      ],
+      raw: true
     });
     res.status(200).send(student);
   }
