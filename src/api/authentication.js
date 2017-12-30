@@ -11,7 +11,6 @@ const generator = new CodeGenerator();
 const pattern = '************';
 const secretKeys = require('../../secret-keys');
 
-
 exports.signin = async function(req, res, next) {
   let user, checkUser;
   try {

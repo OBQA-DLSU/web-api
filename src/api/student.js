@@ -22,20 +22,22 @@ exports.getAllStudent = async (req, res, next) => {
 // /myClass/:myClassId
 exports.getMyClassStudent = async (req, res, next) => {
   const { myClassId } = req.params;
-  let myClass;
+  let myClassStudent;
   try {
-    myClass = await db.myClass.findOne({
-      where: {id: myClassId},
+    myClassStudent = await db.myClassStudent.findAll({
+      where: {myClassId},
       include: [
-        { model: db.myClassStudent, include: [
-          { model: db.student, include: [ { model: db.user, attributes: ['id', 'idNumber', 'lname', 'fname', 'email'] }] }
+        { model: db.student, include: [
+          { model: db.user, attributes: ['id', 'idNumber', 'lname', 'fname', 'email'] }
         ] }
-      ]
+      ],
+      raw: true
     });
-    if (!myClass || !myClass.myClassStudents || myClass.myClassStudents.length === 0) { res.status(400).send(ErrorMessageService.clientError(`There are no students on Class ID: ${myClassId}.`)); return; }
-    res.status(200).send(myClass);
+    if (!myClassStudent) { res.status(400).send(ErrorMessageService.clientError(`There are no students on Class ID: ${myClassId}.`)); return; }
+    res.status(200).send(myClassStudent);
   }
   catch (e) {
+    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
