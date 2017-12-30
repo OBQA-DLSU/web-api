@@ -354,9 +354,9 @@ const updateAssessmentFunction = (
         include: [
           { model: db.program },
           { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
-          { model: db.programCourse, include: [{ model: db.course }] },
-          { model: db.improvementPlanSuggestion }
-        ]
+          { model: db.programCourse, include: [{ model: db.course }] }
+        ],
+        raw: true
       });
       resolve(populatedAssessment);
     }
