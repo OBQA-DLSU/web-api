@@ -7,7 +7,7 @@ const studentRouter = require('./route/student.route');
 const assessmentRouter = require('./route/assessment.route');
 const gradeRouter = require('./route/grade.route');
 const instructorRouter = require('./route/instructor.route');
-const improvementPlanRouter = require('./route/improvementPlanSuggestion.route');
+const assessmentDiscussionRouter = require('./route/assessmentDiscussion.route');
 
 module.exports = (app) => {
   app.get('/', welcomePage);
@@ -20,7 +20,7 @@ module.exports = (app) => {
   app.use('/api/assessment', assessmentRouter);
   app.use('/api/grade', gradeRouter);
   app.use('/api/instructor', instructorRouter);
-  app.use('/api/improvementPlanSuggestion', improvementPlanRouter);
+  app.use('/api/assessmentDiscussion', assessmentDiscussionRouter);
 };
 
 
