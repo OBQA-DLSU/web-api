@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     instructor.belongsTo(models.program);
     instructor.hasMany(models.grade);
     instructor.hasMany(models.myClass);
-    instructor.hasMany(models.improvementPlanSuggestion);
+    instructor.hasMany(models.assessmentDiscussion);
   };
   
   return instructor;

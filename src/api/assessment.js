@@ -12,7 +12,7 @@ exports.getAllAssessments = async (req, res, next) => {
         { model: db.program },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
         { model: db.programCourse, include: [{ model: db.course }] },
-        { model: db.improvementPlanSuggestion }
+        { model: db.assessmentDiscussion }
       ]
     });
     res.status(200).send(assessments);
@@ -33,7 +33,7 @@ exports.getOneAssessment = async (req, res, next) => {
         { model: db.program },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
         { model: db.programCourse, include: [{ model: db.course }] },
-        { model: db.improvementPlanSuggestion }
+        { model: db.assessmentDiscussion }
       ]
     });
     if (!assessment) { res.status(400).send(ErrorMessageService.clientError(`Assessment ID: ${id} is not existing.`)); return; }
@@ -277,7 +277,7 @@ const createAssessmentFunction = (
           { model: db.program },
           { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
           { model: db.programCourse, include: [{ model: db.course }] },
-          { model: db.improvementPlanSuggestion }
+          { model: db.assessmentDiscussion }
         ]
       });
       if (!checkAssessment) {
@@ -302,7 +302,7 @@ const createAssessmentFunction = (
             { model: db.program },
             { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
             { model: db.programCourse, include: [{ model: db.course }] },
-            { model: db.improvementPlanSuggestion }
+            { model: db.assessmentDiscussion }
           ]
         });
       } else {
@@ -404,7 +404,7 @@ const getFilteredProgramAssessmentsFunction = (programId, filterName, filterValu
         { model: db.program },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
         { model: db.programCourse, include: [{ model: db.course }] },
-        { model: db.improvementPlanSuggestion }
+        { model: db.assessmentDiscussion }
       ]
     });
       resolve(assessments);
@@ -428,7 +428,7 @@ const getFilteredAssessmentsFunction = (filterName, filterValue) => {
         { model: db.program },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{model: db.so}]}] },
         { model: db.programCourse, include: [{ model: db.course }] },
-        { model: db.improvementPlanSuggestion }
+        { model: db.assessmentDiscussion }
       ]
     });
       resolve(assessments);
