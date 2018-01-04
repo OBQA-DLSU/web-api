@@ -10,6 +10,7 @@ exports.getAssessmentDiscussion = async (req, res, next) => {
     res.status(200).send(discussions);
   }
   catch (e) {
+    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };

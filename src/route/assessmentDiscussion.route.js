@@ -7,7 +7,7 @@ assessmentDiscussionRouter.route('/assessment/:assessmentId')
 .post(AssessmentDiscussion.createAssessmentDiscussion)
 
 assessmentDiscussionRouter.route('/:id')
-.get(AssessmentDiscussion.getAssessmentDiscussion)
+.get(AssessmentDiscussion.getOneAssessmentDiscussion)
 .put(AssessmentDiscussion.updateAssessmentDiscussion)
 .delete(AssessmentDiscussion.deleteAssessmentDiscussion)
 
