@@ -158,7 +158,6 @@ exports.bulkAddCourse = async (req, res, next) => {
         success.push(addProgramCourseResponse, addCourseResponse);
       }
       catch (e) {
-        console.log(e);
         err.push(e);
       }
     }));
