@@ -10,7 +10,6 @@ exports.getAssessmentDiscussion = async (req, res, next) => {
     res.status(200).send(discussions);
   }
   catch (e) {
-    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
@@ -75,7 +74,7 @@ const discussionFindOne = (queryObject) => {
   return new Promise(async(resolve, reject) => {
     let discussion;
     try {
-      discussions = await db.assessmentDiscussion.findOne({
+      discussion = await db.assessmentDiscussion.findOne({
         where: queryObject,
         include: [
           { model: db.assessment, include: [
@@ -123,17 +122,11 @@ const discussionFindAll = (queryObject) => {
 
 const createDiscussion = (instructorId, assessmentId, discussion) => {
   return new Promise(async(resolve, reject) => {
-    let checkDiscussion, updatedDiscussion, discussion;
+    let result;
     try {
-      checkDiscussion = await discussionFindOne({instructorId, assessmentId});
-      if (!checkDiscussion) {
-        discussion = await createDiscussion(instructorId, assessmentId, discussion);
-      } else {
-        updatedDiscussion = await updateDiscussion(checkDiscussion.id, discussion);
-        if (!updatedDiscussion) { resolve(null); return; }
-        discussion = updatedDiscussion;
-      }
-      resolve(discussion);
+      result = await db.assessmentDiscussion.create({instructorId, assessmentId, discussion});
+      const createdDiscussion = await discussionFindOne({id: result.id});
+      resolve(createdDiscussion);
     }
     catch (e) {
       reject(e);
