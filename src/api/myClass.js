@@ -145,7 +145,6 @@ exports.getAllMyClass = async (req, res, next) => {
 exports.bulkCreateMyClass = async (req, res, next) => {
   const { programId } = req.params;
   if (!req.payload) { res.status(400).send(ErrorMessageService.clientError('Invalid JSON data.')); return; }
-  console.log(req.payload);
   let jsonData, error = [], success =[];
   try {
     jsonData = req.payload;
@@ -154,14 +153,13 @@ exports.bulkCreateMyClass = async (req, res, next) => {
       let course, programCourse, instructor, myClass, user;
       try {
         course = await db.course.findOne({where: {code: data['COURSE']}});
-        if (!course) { err.push(ErrorMessageService.clientError('Course not found.')); }
+        if (!course) { error.push(ErrorMessageService.clientError('Course not found.')); }
         programCourse = await db.programCourse.findOne({where: {programId, courseId: course.id}});
-        if (!programCourse) { err.push(ErrorMessageService.clientError('ProgramCourse not found')); return; }
-        user = await db.user.findOne({where: {fname: data['FIRSTNAME OF INSTRUCTOR'], lname: data['LASTNAME OF INSTRUCTOR']}, include: [db.instructor]});
-        console.log(user);
-        if (!user) { err.push(ErrorMessageService.clientError(`User ${data['FIRSTNAME OF INSTRUCTOR']} not found`)); return; }
-        instructor = await db.instructor.findOne({where: {userId: user.id}});
-        if (!instructor) { err.push(ErrorMessageService.clientError(`Instructor not found.`)); return; }
+        if (!programCourse) { error.push(ErrorMessageService.clientError('ProgramCourse not found')); return; }
+        user = await db.user.findOne({where: {fname: data['FIRSTNAME OF INSTRUCTOR'], lname: data['LASTNAME OF INSTRUCTOR']} });
+        if (!user) { error.push(ErrorMessageService.clientError(`User ${data['FIRSTNAME OF INSTRUCTOR']} not found`)); return; }
+        instructor = await db.instructor.findOne({where: {userId: user.id, programId: programCourse.programId }});
+        if (!instructor) { error.push(ErrorMessageService.clientError(`Instructor not found.`)); return; }
         
         const newData = {
           term: parseInt(data['TERM']),
@@ -172,12 +170,11 @@ exports.bulkCreateMyClass = async (req, res, next) => {
         };
         const { term, academicYear, cycle, programCourseId, instructorId } = newData;
         myClass = await createMyClass(term, academicYear, cycle, programId, programCourseId, instructorId);
-        if (!myClass) { err.push(ErrorMessageService.clientError(`Failed to create new MyClass.`)); return; }
+        if (!myClass) { error.push(ErrorMessageService.clientError(`Failed to create new MyClass.`)); return; }
         success.push(myClass);
       }
       catch (e) {
-        console.log(e);
-        err.push(ErrorMessageService.serverError());
+        error.push(ErrorMessageService.serverError());
       }
     }));
     res.status(200).send({error, success});
