@@ -37,14 +37,15 @@ exports.getMyClassStudent = async (req, res, next) => {
     res.status(200).send(myClassStudent);
   }
   catch (e) {
-    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
 
 exports.createMyClassStudent = async (req, res, next) => {
   const { myClassId } = req.params;
-  const { idNumber, fname, lname, programId, email, isAdmin } = req.body;
+  const { idNumber, fname, lname, programId, email } = req.body;
+  let isAdmin;
+  (req.body.isAdmin) ? isAdmin = true : isAdmin = false;
   let checkUser, user, checkStudent, student, myClassStudentCheck, myClassStudent, checkClass, enrolledStudent;
   try {
     checkClass = await db.myClass.findOne({where: {id: myClassId}});
