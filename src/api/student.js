@@ -46,40 +46,14 @@ exports.createMyClassStudent = async (req, res, next) => {
   const { idNumber, fname, lname, programId, email } = req.body;
   let isAdmin;
   (req.body.isAdmin) ? isAdmin = true : isAdmin = false;
-  let checkUser, user, checkStudent, student, myClassStudentCheck, myClassStudent, checkClass, enrolledStudent;
+  let result;
   try {
-    checkClass = await db.myClass.findOne({where: {id: myClassId}});
-    if (!checkClass) { res.status(400).send(ErrorMessageService.clientError(`Class ID: ${myClassId} does not exist.`)); return; }
-    checkUser = await db.user.findOne({where: { idNumber }});
-    if (!checkUser) {
-      user = await db.user.create({idNumber, fname, lname, email, roleId: 2 }, {individualHooks: true});
-    } else {
-      user = checkUser;
+    result = await createMyClassStudentFunction(myClassId, idNumber, fname, lname, programId, email, isAdmin);
+    if (result.err) {
+      res.status(400).send(err);
+      return;
     }
-    if (!user) { res.status(400).send(ErrorMessageService.clientError(`Invalid input.`)); return; }
-    checkStudent = await db.student.findOne({where: {userId: user.id, programId} });
-    if (!checkStudent) {
-      student = await db.student.create({userId: user.id, programId, isAdmin});
-    } else {
-      student = checkStudent;
-    }
-    if (!student) { res.status(400).send(ErrorMessageService.clientError(`Student was not created.`)); return; }
-    myClassStudentCheck = await db.myClassStudent.findOne({ where: {myClassId, studentId: student.id} });
-    if (!myClassStudentCheck) {
-      myClassStudent = await db.myClassStudent.create({myClassId, studentId: student.id}, {individualHooks:true});
-    } else {
-      myClassStudent = myClassStudentCheck;
-    }
-    if (!myClassStudent) { res.status(400).send(ErrorMessageService.clientError(`Student was not enrolled.`)); return; }
-    enrolledStudent = await db.myClassStudent.findOne({
-      where: {id: myClassStudent.id},
-      include: [
-        { model: db.student, include: [
-          { model: db.user, attributes: ['idNumber', 'lname', 'fname', 'id', 'email'] }] }
-        ],
-        raw: true
-      });
-    res.status(200).send(enrolledStudent);
+    res.status(200).send(result.student);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -106,6 +80,39 @@ exports.getStudentByProgram = async (req, res, next) => {
 };
 
 // /bulk/:myClassId
+exports.bulkCreateMyStudent = async (req, res, next) => {
+  const { programId, myClassId } = req.params;
+  const jsonData = req.payload;
+  let result, error = [], success = [];
+  try {
+    if (!jsonData && jsonData.length === 0) { res.status(400).send(ErrorMessageService.clientError('Invalid file')); return; }
+    result = await Promise.all(jsonData.map(async (data) => {
+      const newData = {
+        idNumber: data['STUDENT ID'],
+        fname: data['FIRSTNAME'],
+        lname: data['LASTNAME'],
+        email: data['EMAIL'],
+        isAdmin: null
+      };
+      const { idNumber, fname, lname, email, isAdmin } = newData;
+      try {
+        const createResult = await createMyClassStudentFunction(myClassId, idNumber, fname, lname, programId, email, isAdmin);
+        if (createResult.err) {
+          error.push(createResult.err);
+          return;
+        }
+        success.push(createResult.student);
+      }
+      catch (e) {
+        error.push(e);
+      }
+    }));
+    res.status(200).send({error, success});
+  }
+  catch(e) {
+    res.status(500).send(ErrorMessageService.serverError());
+  }
+};
 
 // /:id
 exports.getStudentById = async (req, res, next) => {
@@ -242,3 +249,47 @@ exports.deleteMyClassStudent = async (req, res, next) => {
 };
 
 // functions
+const createMyClassStudentFunction = (myClassId, idNumber, fname, lname, programId, email, isAdminData) => {
+  return new Promise(async (resolve, reject) => {
+    let isAdmin;
+    (isAdminData) ? isAdmin = true : isAdmin = false;
+    let checkUser, user, checkStudent, student, myClassStudentCheck, myClassStudent, checkClass, enrolledStudent;
+    try {
+      checkClass = await db.myClass.findOne({where: {id: myClassId}});
+      if (!checkClass) { resolve({err: ErrorMessageService.clientError(`Class ID: ${myClassId} does not exist.`)}); return; }
+      checkUser = await db.user.findOne({where: { idNumber }});
+      if (!checkUser) {
+        user = await db.user.create({idNumber, fname, lname, email, roleId: 2 }, {individualHooks: true});
+      } else {
+        user = checkUser;
+      }
+      if (!user) { resolve({err: ErrorMessageService.clientError(`Invalid input.`)}); return; }
+      checkStudent = await db.student.findOne({where: {userId: user.id, programId} });
+      if (!checkStudent) {
+        student = await db.student.create({userId: user.id, programId, isAdmin});
+      } else {
+        student = checkStudent;
+      }
+      if (!student) { resolve({err: ErrorMessageService.clientError(`Student was not created.`)}); return; }
+      myClassStudentCheck = await db.myClassStudent.findOne({ where: {myClassId, studentId: student.id} });
+      if (!myClassStudentCheck) {
+        myClassStudent = await db.myClassStudent.create({myClassId, studentId: student.id}, {individualHooks:true});
+      } else {
+        myClassStudent = myClassStudentCheck;
+      }
+      if (!myClassStudent) { resolve({err: ErrorMessageService.clientError(`Student was not enrolled.`)}); return; }
+      enrolledStudent = await db.myClassStudent.findOne({
+        where: {id: myClassStudent.id},
+        include: [
+          { model: db.student, include: [
+            { model: db.user, attributes: ['idNumber', 'lname', 'fname', 'id', 'email'] }] }
+          ],
+          raw: true
+        });
+      resolve({err: null, student: enrolledStudent});
+    }
+    catch (e) {
+      resolve({err: ErrorMessageService.serverError()});
+    }
+  });
+};
