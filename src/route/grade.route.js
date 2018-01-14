@@ -48,8 +48,9 @@ gradeRouter.route('/bulk/:myClassId')
 .delete(Grade.deleteBulkMyClassGrades);
 
 
-gradeRouter.route('/all')
+gradeRouter.route('/')
 .get(Grade.getAllGrades)
+.post(Grade.getGradeWithQueryObject);
 
 gradeRouter.route('/:filterName/:filterValue')
 .get(Grade.getFilteredGrades)

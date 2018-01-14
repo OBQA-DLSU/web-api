@@ -49,8 +49,9 @@ assessmentRouter.route('/bulk/:programId')
 assessmentRouter.route('/filteredByProgramId/:programId/:filterName/:filterValue')
 .get(Assessment.getFilteredProgramAssessments);
 
-assessmentRouter.route('/all')
+assessmentRouter.route('/')
 .get(Assessment.getAllAssessments)
+.post(Assessment.getAssessmentWithFilterObject);
 
 assessmentRouter.route('/:filterName/:filterValue')
 .get(Assessment.getFilteredAssessments)
