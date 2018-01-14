@@ -1,7 +1,7 @@
 const db = require('../models');
 const ErrorMessageService = require('../services/errorMessage.service');
 const { Op } = require('sequelize');
-
+const AssessmentHelper = require('../helpers/assessment.helper');
 // /all
 exports.getAllAssessments = async (req, res, next) => {
   let assessments;
@@ -18,6 +18,22 @@ exports.getAllAssessments = async (req, res, next) => {
     res.status(200).send(assessments);
   }
   catch (e) {
+    res.status(500).send(ErrorMessageService.serverError());
+  }
+};
+
+exports.getAssessmentWithFilterObject = async (req, res, next) => {
+  const { operator, queryObjectArray } = req.body;
+  let result;
+  try {
+    result = await AssessmentHelper.getAssessmentWithFilterObjectHelper(operator, queryObjectArray);
+    if (result.err) {
+      res.status(400).send(result.err);
+    }
+    res.status(200).send(result.assessments);
+  }
+  catch (e) {
+    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
