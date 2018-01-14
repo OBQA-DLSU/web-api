@@ -1,6 +1,6 @@
 const db = require('../models');
 const ErrorMessageService = require('../services/errorMessage.service');
-
+const GradeHelper = require('../helpers/grade.helper');
 // /:id
 exports.getOneGrade = async (req, res, next) => {
   const { id } = req.params;
@@ -12,7 +12,7 @@ exports.getOneGrade = async (req, res, next) => {
         { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
         { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
-        { model: db.programCourse, includ: [{ model: db.course }] },
+        { model: db.programCourse, include: [{ model: db.course }] },
         { model: db.assessment },
         { model: db.myClass }
       ]
@@ -86,7 +86,7 @@ exports.getMyClassGrades = async (req, res, next) => {
         { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
         { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
-        { model: db.programCourse, includ: [{ model: db.course }] },
+        { model: db.programCourse, include: [{ model: db.course }] },
         { model: db.assessment },
         { model: db.myClass }
       ]
@@ -155,7 +155,7 @@ exports.deleteBulkMyClassGrades = async (req, res, next) => {
   res.status(200).send({message: 'This feature is not yet available.'});
 };
 
-// /all
+// /
 exports.getAllGrades = async (req, res, next) => {
   let gradeData;
   try {
@@ -164,12 +164,28 @@ exports.getAllGrades = async (req, res, next) => {
         { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
         { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
-        { model: db.programCourse, includ: [{ model: db.course }] },
+        { model: db.programCourse, include: [{ model: db.course }] },
         { model: db.assessment },
         { model: db.myClass }
       ]
     });
     res.status(200).send(gradeData);
+  }
+  catch (e) {
+    res.status(500).send(ErrorMessageService.serverError());
+  }
+};
+
+exports.getGradeWithQueryObject = async (req, res, next) => {
+  const { operator, queryObjectArray } = req.body;
+  let result;
+  try {
+    result = await GradeHelper.getGradeWithQueryObjectHelper(operator, queryObjectArray);
+    if (result.err) {
+      res.status(400).send(result.err);
+      return;
+    }
+    res.status(200).send(result.grades);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -188,7 +204,7 @@ exports.getFilteredGrades = async (req, res, next) => {
         { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
         { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
         { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
-        { model: db.programCourse, includ: [{ model: db.course }] },
+        { model: db.programCourse, include: [{ model: db.course }] },
         { model: db.assessment },
         { model: db.myClass }
       ]
@@ -238,7 +254,7 @@ const createGradeFunction = (
           { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
           { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
           { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
-          { model: db.programCourse, includ: [{ model: db.course }] },
+          { model: db.programCourse, include: [{ model: db.course }] },
           { model: db.assessment },
           { model: db.myClass }
         ]
@@ -332,7 +348,7 @@ const updateGradeFunction = (
           { model: db.student, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
           { model: db.instructor, include: [{ model: db.user, attributes: ['id','idNumber', 'email', 'lname', 'fname'] }] },
           { model: db.programSopi, include: [{ model: db.sopi, include: [{ model: db.so }] }] },
-          { model: db.programCourse, includ: [{ model: db.course }] },
+          { model: db.programCourse, include: [{ model: db.course }] },
           { model: db.assessment },
           { model: db.myClass }
         ]
