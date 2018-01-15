@@ -20,7 +20,8 @@ exports.getGradeWithQueryObjectHelper = (operator, queryObjectArray) => {
           { model: db.programCourse, include: [{ model: db.course }] },
           { model: db.assessment },
           { model: db.myClass }
-        ]
+        ],
+        raw: true
       });
       if (!grades) {
         resolve({err: ErrorMessageService.clientError('Invalid query.')});
