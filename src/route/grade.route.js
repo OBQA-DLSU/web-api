@@ -52,6 +52,9 @@ gradeRouter.route('/')
 .get(Grade.getAllGrades)
 .post(Grade.getGradeWithQueryObject);
 
+gradeRouter.route('/myClassGrade/:myClassId')
+.post(Grade.createMyClassGrade)
+
 gradeRouter.route('/:filterName/:filterValue')
 .get(Grade.getFilteredGrades)
 
