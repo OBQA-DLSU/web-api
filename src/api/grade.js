@@ -15,7 +15,8 @@ exports.getOneGrade = async (req, res, next) => {
         { model: db.programCourse, include: [{ model: db.course }] },
         { model: db.assessment },
         { model: db.myClass }
-      ]
+      ],
+      raw: true
     });
     if (!gradeData) { res.status(400).send(ErrorMessageService.clientError(`Data for grade ID: ${id} was not found.`)); return; }
     res.status(200).send(gradeData);
@@ -89,7 +90,8 @@ exports.getMyClassGrades = async (req, res, next) => {
         { model: db.programCourse, include: [{ model: db.course }] },
         { model: db.assessment },
         { model: db.myClass }
-      ]
+      ],
+      raw: true
     });
     res.status(200).send(gradeData);
   }
@@ -192,6 +194,35 @@ exports.getGradeWithQueryObject = async (req, res, next) => {
   }
 };
 
+// /myClassGrade/:myClassId
+
+exports.createMyClassGrade = async (req, res, next) => {
+  const { myCLassId } = req.params;
+  const {
+    grade,
+    term,
+    cycle,
+    academicYear,
+    studentId,
+    instructorId,
+    programCourseId,
+    programSopiId,
+    assessmentId
+  } = req.body;
+  let gradeData;
+  try {
+    gradeData = await createGradeFunction(grade, term, cycle, academicYear, studentId, instructorId, programCourseId, programSopiId, myClassId, assessmentId);
+    if (!gradeData) {
+      res.status(400).send(ErrorMessageService.clientError('Invalid inputs'));
+      return;
+    }
+    res.status(200).send(gradeData);
+  }
+  catch (e) {
+    res.status(500).send(ErrorMessageService.serverError());
+  }
+};
+
 //  /:filterName/:filterValue
 
 exports.getFilteredGrades = async (req, res, next) => {
@@ -207,7 +238,8 @@ exports.getFilteredGrades = async (req, res, next) => {
         { model: db.programCourse, include: [{ model: db.course }] },
         { model: db.assessment },
         { model: db.myClass }
-      ]
+      ],
+      raw: true
     });
     res.status(200).send(gradeData);
   }
@@ -257,7 +289,8 @@ const createGradeFunction = (
           { model: db.programCourse, include: [{ model: db.course }] },
           { model: db.assessment },
           { model: db.myClass }
-        ]
+        ],
+        raw: true
       })
       resolve(gradeData);
     }
@@ -351,7 +384,8 @@ const updateGradeFunction = (
           { model: db.programCourse, include: [{ model: db.course }] },
           { model: db.assessment },
           { model: db.myClass }
-        ]
+        ],
+        raw: true
       });
       resolve(gradeData);
     }
