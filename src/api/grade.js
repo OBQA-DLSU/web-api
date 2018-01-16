@@ -29,7 +29,7 @@ exports.getOneGrade = async (req, res, next) => {
 exports.updateGrade = async (req, res, next) => {
   const { id } = req.params;
   const { 
-    grade,
+    gradeData, // array
     term,
     cycle,
     academicYear,
@@ -42,21 +42,7 @@ exports.updateGrade = async (req, res, next) => {
    } = req.body;
   let updatedGrade;
   try {
-    updatedGrade = await updateGradeFunction(
-      id,
-      grade,
-      term,
-      cycle,
-      academicYear,
-      studentId,
-      instructorId,
-      programCourseId,
-      programSopiId,
-      myClassId,
-      assessmentId
-    );
-    if (!updatedGrade) { res.status(400).send(ErrorMessageService.clientError(`Was not able to update grade ID: ${id}`)); return; }
-    res.status(200).send(updatedGrade);
+    
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
@@ -102,11 +88,19 @@ exports.getMyClassGrades = async (req, res, next) => {
 
 exports.updateMyClassGrades = async (req, res, next) => {
   const { myClassId } = req.params;
-  const { myClassGradeData } = req.body; // this must be an array of gradeData.
-  let updateMyClassGradesResult;
+  const { 
+    gradeData, // array that has programSopiId, assessmentId, and grade
+    term,
+    cycle,
+    academicYear,
+    studentId,
+    instructorId,
+    programCourseId } = req.body; // this must be an array of gradeData.
+    console.log(req.body);
+  let result;
   try {
-    updateMyClassGradesResult = await updateMyClassGradesArrayFunction(myClassId, myClassGradeData);
-    res.status(200).send(updateMyClassGradesResult);
+    result = await GradeHelper.createUpdateGradeHelper(gradeData, term, cycle, academicYear, studentId, instructorId, programCourseId, myClassId);
+    res.status(200).send(result);
   }
   catch (e) {
     res.status(500).send(ErrorMessageService.serverError());
