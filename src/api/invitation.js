@@ -49,12 +49,13 @@ const getCode = (programId, roleId, isAdmin, isStudent) => {
 
 const invite = (email, invitationCode) => {
   return new Promise( async (resolve, reject) => {
+    const link = `https://dlsu-obqa-web-ui-staging.herokuapp.com/#/pages/sign-up/${invitationCode}`;
     sgMail.setApiKey(secretKeys.OBQA_INVITE_KEY);
     const msg = {
       to: email,
       from: 'johnhiggins.avila@gmail.com',
       subject: 'Invitation from GCOE-CQI office',
-      html: `<strong>Hello!</strong><br/><p>Please click the following link to signup: <a href="www.google.com/${invitationCode}">Sign up with code: ${invitationCode}<a></p></br><p>Sincerely,</p></br><p>GCOE-CQI Team</p>`
+      html: `<strong>Hello!</strong><br/><p>Please click the following link to signup: <a href="${link}">Sign up with code: ${invitationCode}<a></p></br><p>Sincerely,</p></br><p>GCOE-CQI Team</p>`
     };
     try {
       const mailResponse = await sgMail.send(msg);
