@@ -60,7 +60,6 @@ exports.createUpdateGradeHelper = (
           success.push(newGrade);
         }
         catch(e) {
-          console.log(e);
           error.push(e);
         }
       }));
@@ -133,7 +132,7 @@ const updateGradeFunction = (id, grade) => {
     let updatedGrade;
     try {
       updatedGrade = await db.grade.update({
-        grade
+        grade: grade
       }, { where: {id}, individualHooks: true, returning: true });
       if (!updatedGrade[1][0]) { resolve(null); return; }
       const gradeData = await db.grade.findOne({
