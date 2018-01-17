@@ -96,7 +96,6 @@ exports.updateMyClassGrades = async (req, res, next) => {
     studentId,
     instructorId,
     programCourseId } = req.body; // this must be an array of gradeData.
-    console.log(req.body);
   let result;
   try {
     result = await GradeHelper.createUpdateGradeHelper(gradeData, term, cycle, academicYear, studentId, instructorId, programCourseId, myClassId);
@@ -118,7 +117,6 @@ exports.createMyClassGrades = async (req, res, next) => {
     res.status(200).send(myClassInputResult);
   }
   catch (e) {
-    console.log(e);
     res.status(500).send(ErrorMessageService.serverError());
   }
 };
@@ -126,19 +124,30 @@ exports.createMyClassGrades = async (req, res, next) => {
 // /bulk/:myClassId
 exports.createBulkMyClassGrades = async (req, res, next) => {
   const { myClassId } = req.params;
-  // this feature needs more testing.
-  // let myClassInputResult, createdGrades;
-  // try {
-  //   jsonData = req.payload;
-  //   myClassInputResult = await gradeXlsxHeaderReaderHelper(myClassId, jsonData);
-  //   createdGrades = await createGradeArrayFunction(myClassId, myClassInputResult);
-  //   res.status(200).send(createdGrades);
-  // }
-  // catch (e) {
-  //   console.log(e);
-  //   res.status(500).send(ErrorMessageService.serverError());
-  // }
-  res.status(200).send({message: 'This feature is not yet available.'});
+  let result, success = [], error = [];
+  if (!req.body) {
+    res.status(400).send(ErrorMessageService.clientError('Invalid Input'));
+    return;
+  }
+  try {
+    result = await Promise.all(req.body.map( async(myClassGradeData) => {
+      const { 
+        gradeData, // array that has programSopiId, assessmentId, and grade
+        term,
+        cycle,
+        academicYear,
+        studentId,
+        instructorId,
+        programCourseId } = myClassGradeData;
+      inputResult = await GradeHelper.createUpdateGradeHelper(gradeData, term, cycle, academicYear, studentId, instructorId, programCourseId, myClassId);
+      if (!inputResult) { error.push(ErrorMessageService.clientError('Invalid Input')); return; }
+      success.push(inputResult);
+    }));
+    res.status(200).send({error, success});
+  }
+  catch(e) {
+    res.status(500).send(ErrorMessageService.serverError());
+  }
 };
 
 exports.updateBulkMyClassGrades = async (req, res, next) => {
