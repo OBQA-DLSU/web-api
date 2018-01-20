@@ -4,7 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 5000;
 const db = require('./src/models');
-const apiRoutes = require('./src/router');
+const apiRoutes = require('./src/route/');
 const morgan = require('morgan');
 const cors = require('cors');
 
