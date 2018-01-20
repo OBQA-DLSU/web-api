@@ -1,7 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
   const evidence = sequelize.define('evidence', {
     name: { type: DataTypes.STRING, allowNull: true },
-    storage: { type: DataTypes.STRING, allowNull: true },
+    googleId: { type: DataTypes.STRING },
+    mimeType: { type: DataTypes.STRING },
     type: { type: DataTypes.STRING, enum:['MIN', 'MAX', 'MED'] }
   });
 
