@@ -19,9 +19,15 @@ const upload = multer({
 	storage: storage
 });
 
-evidenceRouter.route('/:programId')
+evidenceRouter.route('/:programId/:id')
+.put(GoogleAuth, upload.single('file'), Evidence.updateEvidence)
+
+evidenceRouter.route('/program/:programId')
 .get(GoogleAuth, Evidence.getListOfEvidencePerProgram)
-.post(GoogleAuth, upload.single('file'), Evidence.saveEvidence);
+.post(GoogleAuth, upload.single('file'), Evidence.saveEvidence); // can be used to add / change the uploaded evidence
+
+evidenceRouter.route('/myClass/:myClassId')
+.get(Evidence.getMyClassEvidenceMetaData)
 
 evidenceRouter.route('/query/:programId') // with query object.
 .post()
