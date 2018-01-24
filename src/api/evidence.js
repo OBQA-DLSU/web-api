@@ -1,9 +1,29 @@
 const db = require('../models');
 const EvidenceHelper = require('../helpers/evidence.helper');
-const ErroMessage = require('../services/errorMessage.service');
+const ErrorMessage = require('../services/errorMessage.service');
 
-exports.getListOfEvidencePerProgram = (req, res, next) => {
-  
+exports.getListOfEvidencePerProgram = async (req, res, next) => {
+  const { programId } = req.params;
+  let evidences;
+  try {
+    evidences = await db.evidence.findAll({
+      where: { programId },
+      include: [
+        { model: db.assessment },
+        { model: db.myClass },
+        { model: db.program },
+        { model: db.programSopi, include: [
+          { model: db.sopi, include: [{model: db.so}]}
+        ] },
+        { model: db.programCourse, include: [{model: db.course}]}
+      ],
+      raw: true
+    });
+    res.status(200).send(evidences);
+  }
+  catch (e) {
+    res.status(500).send(ErrorMessage.serverError());
+  }
 };
 
 // /:programId/:id
@@ -20,7 +40,7 @@ exports.updateEvidence = async (req, res, next) => {
   try {
     const updateFile = await EvidenceHelper.updateFile(req);
     if (updateFile.err) {
-      res.status(400).send(ErroMessage.clientError('File was not updated.'));
+      res.status(400).send(ErrorMessage.clientError('File was not updated.'));
       return;
     }
     const { id, name, mimeType } = updateFile.response;
@@ -33,7 +53,7 @@ exports.updateEvidence = async (req, res, next) => {
   }
   catch (e) {
     console.log(e);
-    res.status(500).send(ErroMessage.serverError());
+    res.status(500).send(ErrorMessage.serverError());
   }
 }
 
@@ -50,7 +70,7 @@ exports.saveEvidence = async (req, res, next) => {
   try {
     const saveData = await EvidenceHelper.saveFile(req);
     if (saveData.err) {
-      res.status(400).send(ErroMessage.clientError('File was not save.'));
+      res.status(400).send(ErrorMessage.clientError('File was not save.'));
       return;
     }
     const { id, name, mimeType  } = saveData.response;
@@ -63,7 +83,7 @@ exports.saveEvidence = async (req, res, next) => {
   }
   catch(e) {
     console.log(e);
-    res.status(500).send(ErroMessage.serverError());
+    res.status(500).send(ErrorMessage.serverError());
   }
 };
 
@@ -76,6 +96,23 @@ exports.getMyClassEvidenceMetaData = async (req, res, next) => {
   }
   catch(e) {
     console.log(e);
-    res.status(500).send(ErroMessage.serverError());
+    res.status(500).send(ErrorMessage.serverError());
   }
 };
+
+// /query
+exports.getEvidenceWithQueryObject = async (req, res, next) => {
+  const { operator, queryObjectArray } = req.body;
+  let queryResult;
+  try {
+    queryResult = await EvidenceHelper.getEvidenceWithQueryObject(operator, queryObjectArray);
+    if (queryResult.err) {
+      res.status(400).send(ErrorMessage.clientError(queryResult.err));
+      return;
+    }
+    res.status(200).send(queryResult.evidences);
+  }
+  catch (e) {
+    res.status(500).send(ErrorMessage.serverError());
+  }
+}
