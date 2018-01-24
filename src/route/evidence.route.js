@@ -29,7 +29,7 @@ evidenceRouter.route('/program/:programId')
 evidenceRouter.route('/myClass/:myClassId')
 .get(Evidence.getMyClassEvidenceMetaData)
 
-evidenceRouter.route('/query/:programId') // with query object.
+evidenceRouter.route('/query') // with query object.
 .post()
 
 module.exports = evidenceRouter;

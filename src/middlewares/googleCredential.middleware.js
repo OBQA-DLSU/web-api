@@ -37,6 +37,10 @@ const authenticate = (req, res, next) => {
    * @param {function} callback The callback to call with the authorized client.
    */
   function authorize(credentials, callback) {
+    if (!credentials) {
+      res.status(400).send('Invalid Credentials');
+      return;
+    }
     var clientSecret = credentials.web.client_secret;
     var clientId = credentials.web.client_id;
     var redirectUrl = credentials.web.redirect_uris[0];
