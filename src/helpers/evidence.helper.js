@@ -181,3 +181,37 @@ exports.getMyClassEvidenceMetaData = (myClassId) => {
     }
   });
 }
+
+exports.getEvidenceWithQueryObject = (operator, queryObjectArray) => {
+  let op, evidences;
+  if (operator && operator.toUpperCase() === 'ADD') {
+    op = Op.and;
+  } else {
+    op = Op.or;
+  }
+  return new Promise(async(resolve, reject) => {
+    try {
+      evidences = await db.evidence.findAll({
+        where: {[op]: queryObjectArray},
+        include: [
+          { model: db.assessment },
+          { model: db.myClass },
+          { model: db.program },
+          { model: db.programSopi, include: [
+            { model: db.sopi, include: [{model: db.so}]}
+          ] },
+          { model: db.programCourse, include: [{model: db.course}]}
+        ],
+        raw: true
+      });
+      if (!evidences) {
+        resolve({err: ErrorMessageService.clientError('Invalid query.')});
+        return;
+      }
+      resolve({err: null, evidences});
+    }
+    catch (e) {
+      resolve({err: ErrorMessageService.clientError('Invalid query.')});
+    }
+  });
+}
